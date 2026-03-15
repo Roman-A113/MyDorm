@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Дашборд - Общежитие №6</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>Дашборд</h1>
+        <div class="actions">
+            <button id="logoutBtn" class="btn">Выйти</button>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tabBtn active" data-tab="feed">Лента</button>
+        <button class="tabBtn" data-tab="laundry">Стирка</button>
+        <button class="tabBtn" data-tab="shifts">Ремонт</button>
+        <button class="tabBtn" data-tab="events">Мероприятия</button>
+        <button class="tabBtn" data-tab="notices">Объявления</button>
+    </nav>
+
+    <main class="dashboard-content">
+        <section id="feed" class="tab active"></section>
+        <section id="laundry" class="tab hidden"></section>
+        <section id="shifts" class="tab hidden"></section>
+        <section id="events" class="tab hidden"></section>
+        <section id="notices" class="tab hidden"></section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>
