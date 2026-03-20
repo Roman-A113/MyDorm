@@ -148,7 +148,7 @@ body {
     border-color: var(--accent)
 }
 
-.dashboard-content {
+.mainmenu-content {
     max-width: 1100px;
     margin: 1rem auto;
     padding: 1rem
@@ -166,7 +166,7 @@ body {
     display: none
 }
 
-/* Новые стили для dashboard */
+/* Новые стили для главного меню */
 .feed-card {
     background: var(--card);
     border: 1px solid #e2e8f0;
@@ -267,18 +267,27 @@ body {
     border: 1px solid #feb2b2;
 }
 
-.dashboard-content h3 {
+.text-success {
+    color: #2f855a;
+    margin-top: .7rem;
+    padding: .5rem;
+    background: #f0fff4;
+    border-radius: .5rem;
+    border: 1px solid #9ae6b4;
+}
+
+.mainmenu-content h3 {
     margin-bottom: 1rem;
     font-size: 1.5rem;
     color: var(--text);
 }
 
-.dashboard-content ul {
+.mainmenu-content ul {
     list-style: none;
     padding: 0;
 }
 
-.dashboard-content li {
+.mainmenu-content li {
     padding: 1rem;
     margin: .5rem 0;
     background: var(--card);
@@ -287,7 +296,7 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
 }
 
-.dashboard-content li b {
+.mainmenu-content li b {
     color: var(--accent);
 }
 

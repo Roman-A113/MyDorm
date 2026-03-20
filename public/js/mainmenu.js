@@ -1,46 +1,16 @@
-function renderNotification(text) {
+function renderNotification(text, type = 'error') {
     const msg = document.createElement('div');
-    msg.className = 'text-error';
+    msg.className = type === 'success' ? 'text-success' : 'text-error';
     msg.textContent = text;
-    const main = document.querySelector('.dashboard-content');
+    const main = document.querySelector('.mainmenu-content');
     main.prepend(msg);
     setTimeout(() => msg.remove(), 4000);
-}
-
-async function loadDashboard() {
-    try {
-        const profile = await getCurrentUser();
-        window.currentUser = profile;
-        document.querySelector('.topbar h1').textContent = `Дашборд — ${profile.name} (${profile.role})`;
-
-        await renderFeed();
-        await renderLaundry();
-        await renderShifts();
-        await renderEvents();
-        await renderNotices();
-    } catch (error) {
-        renderNotification('Ошибка загрузки дашборда: ' + error.message);
-        if (error.message.includes('401')) {
-            localStorage.removeItem('dorm6_token');
-            window.location.href = 'login.html';
-        }
-    }
-}
-
-function switchTab(tabKey) {
-    document.querySelectorAll('.tabBtn').forEach((btn) => {
-        btn.classList.toggle('active', btn.dataset.tab === tabKey);
-    });
-    document.querySelectorAll('.tab').forEach((tab) => {
-        tab.classList.toggle('active', tab.id === tabKey);
-        tab.classList.toggle('hidden', tab.id !== tabKey);
-    });
 }
 
 async function renderFeed() {
     const panel = document.getElementById('feed');
     panel.innerHTML = `
-    <h3>Лента событий</h3>
+    <h3>Лента новостей</h3>
     <div class="feed-card"><strong>Новая стирка!</strong> Машина №2 доступна 16 марта, 19:00. Запись открыта.</div>
     <div class="feed-card"><strong>Плановое собрание</strong> 17 марта в 18:00, заездной холл. Каждый студент может предложить тему.</div>
     <div class="feed-card"><strong>Ремонт</strong> Плотник Иван добавил слот 18 марта, 10:00-12:00.</div>
@@ -51,37 +21,42 @@ async function renderLaundry() {
     const panel = document.getElementById('laundry');
     try {
         const slots = await getLaundrySlots();
-        const real = slots.length > 0;
-        const tableRows = (real ? slots : [{ slot_date: '2026-03-16', slot_time: '20:00', machine_number: 3, free_spots: 2, id: 0 }])
-            .map((slot) => `
-      <tr>
-        <td>${slot.slot_date}</td>
-        <td>${slot.slot_time}</td>
-        <td>${slot.machine_number}</td>
-        <td>${slot.free_spots}</td>
-        <td><button data-id="${slot.id}" class="btn bookLaundry">Записаться</button></td>
-      </tr>
-    `)
-            .join('');
+        const tableRows = slots.map((slot) =>
+            `<tr>
+                <td>${slot.slot_date}</td>
+                <td>${slot.slot_time}</td>
+                <td>${slot.free_spots}</td>
+                <td>
+                    <button data-id="${slot.id}" class="btn bookLaundry">Записаться</button>
+                </td>
+            </tr>`).join('');
 
-        panel.innerHTML = `<h3>Стирка</h3><table class="simple-table"><thead><tr><th>Дата</th><th>Время</th><th>Машина</th><th>Свободно</th><th>Действие</th></tr></thead><tbody>${tableRows}</tbody></table>`;
-        if (!real) {
-            panel.insertAdjacentHTML('beforeend', '<p class="muted">Пример данных: вы можете добавить реальные слоты через панель админа.</p>');
-        }
+        panel.innerHTML = `<h3>Стирка</h3>
+                <table class="simple-table">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Время</th>
+                            <th>Количество свободных машинок</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>`;
 
         panel.querySelectorAll('.bookLaundry').forEach((btn) => {
             btn.addEventListener('click', async () => {
                 try {
                     await bookLaundry(btn.dataset.id);
-                    renderNotification('Успешно записались на стирку');
+                    renderNotification('Вы успешно записались на стирку', 'success');
                     await renderLaundry();
                 } catch (error) {
-                    renderNotification('Ошибка записи: ' + error.message);
+                    renderNotification(error.message);
                 }
             });
         });
     } catch (error) {
-        panel.innerHTML = '<p class="text-error">Не удалось получить слоты стирки.</p>';
+        renderNotification('Не удалось получить слоты стирки: ' + error.message);
     }
 }
 
@@ -157,7 +132,7 @@ async function renderEvents() {
                     date_end: fd.get('date_end') || null,
                     max_participants: fd.get('max_participants') ? Number(fd.get('max_participants')) : null,
                 });
-                renderNotification('Событие создано успешно');
+                renderNotification('Событие создано успешно', 'success');
                 form.reset();
                 await renderEvents();
             } catch (error) {
@@ -170,7 +145,7 @@ async function renderEvents() {
         btn.addEventListener('click', async () => {
             try {
                 if (real) await joinEvent(btn.dataset.id);
-                renderNotification('Вы записаны на мероприятие');
+                renderNotification('Вы записаны на мероприятие', 'success');
             } catch (error) {
                 renderNotification('Ошибка записи: ' + error.message);
             }
@@ -224,7 +199,7 @@ async function renderNotices() {
                     body: fd.get('body'),
                     is_public: fd.get('is_public') === 'on',
                 });
-                renderNotification('Объявление опубликовано');
+                renderNotification('Объявление опубликовано', 'success');
                 form.reset();
                 await renderNotices();
             } catch (error) {
@@ -234,21 +209,52 @@ async function renderNotices() {
     }
 }
 
+async function loadMainMenu() {
+    try {
+        const profile = await getCurrentUser();
+        window.currentUser = profile;
+        document.querySelector('.topbar h1').textContent = `${profile.name} (${profile.role})`;
+
+        await renderFeed();
+        await renderLaundry();
+        await renderShifts();
+        await renderEvents();
+        await renderNotices();
+    } catch (error) {
+        renderNotification('Ошибка загрузки дашборда: ' + error.message);
+        if (error.message.includes('401')) {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    }
+}
+
+
+function initLogout() {
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+    });
+}
+
+function switchTab(tabKey) {
+    document.querySelectorAll('.tabBtn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.tab === tabKey);
+    });
+    document.querySelectorAll('.tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.id === tabKey);
+        tab.classList.toggle('hidden', tab.id !== tabKey);
+    });
+}
+
 function initTabs() {
     document.querySelectorAll('.tabBtn').forEach((btn) => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 }
 
-function initLogout() {
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('dorm6_token');
-        window.location.href = 'login.html';
-    });
-}
-
 window.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initLogout();
-    loadDashboard();
+    loadMainMenu();
 });

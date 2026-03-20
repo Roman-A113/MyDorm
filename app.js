@@ -17,7 +17,14 @@ function generateToken(user) {
 }
 
 async function getUserById(id) {
-    const { rows } = await db.query('SELECT id, name, email, role, profession, room FROM users WHERE id = $1', [id]);
+    const { rows } = await db.query(
+        `SELECT id, name, email, role, profession, room 
+         FROM users
+         WHERE id = ${id}`);
+
+    if (rows.length === 0) {
+        throw new Error(`Пользователь c id ${id} не найден`);
+    }
     return rows[0];
 }
 
@@ -34,7 +41,7 @@ function authMiddleware(req, res, next) {
     }
 }
 
-app.post('/api/auth/register', async (req, res) => {
+app.post('/auth/register', async (req, res) => {
     const { name, email, password, role, profession, room } = req.body;
     if (!name || !email || !password || !role) return res.status(400).json({ error: 'Некорректные данные' });
 
@@ -50,27 +57,27 @@ app.post('/api/auth/register', async (req, res) => {
     res.json({ token, user: result.rows[0] });
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/auth/login', async (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Требуется емейл и пароль' });
-
-    const { rows } = await db.query('SELECT id, name, email, role, password_hash FROM users WHERE email = $1', [email]);
+    const { rows } = await db.query(`SELECT id, name, email, role, password_hash FROM users WHERE email = '${email}'`);
     const user = rows[0];
-    if (!user) return res.status(401).json({ error: 'Неверные учетные данные' });
+    if (!user)
+        return res.status(401).json({ error: 'Неверные учетные данные' });
 
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) return res.status(401).json({ error: 'Неверные учетные данные' });
+    if (!ok)
+        return res.status(401).json({ error: 'Неверные учетные данные' });
 
     const token = generateToken(user);
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 });
 
-app.get('/api/user/me', authMiddleware, async (req, res) => {
+app.get('/user/me', authMiddleware, async (req, res) => {
     const user = await getUserById(req.user.id);
     res.json(user);
 });
 
-app.get('/api/dashboard', authMiddleware, async (req, res) => {
+app.get('/mainmenu', authMiddleware, async (req, res) => {
     const [laundry, shifts, events, notices] = await Promise.all([
         db.query("SELECT id, slot_date, slot_time, machine_number, max_students, (max_students - COALESCE((SELECT COUNT(*) FROM laundry_bookings lb WHERE lb.slot_id=ls.id AND status = 'booked'),0)) AS free_spots FROM laundry_slots ls ORDER BY slot_date, slot_time"),
         db.query('SELECT s.id, s.date, s.from_time AS from, s.to_time AS to, s.status, u.name AS worker_name FROM shifts s JOIN users u ON u.id = s.worker_id ORDER BY s.date, s.from_time'),
@@ -81,29 +88,43 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
     res.json({ laundry: laundry.rows, shifts: shifts.rows, events: events.rows, notices: notices.rows });
 });
 
-app.get('/api/laundry', authMiddleware, async (req, res) => {
-    const { rows } = await db.query("SELECT id, slot_date, slot_time, machine_number, max_students, (max_students - COALESCE((SELECT COUNT(*) FROM laundry_bookings lb WHERE lb.slot_id=ls.id AND status = 'booked'),0)) AS free_spots FROM laundry_slots ls ORDER BY slot_date, slot_time");
+app.get('/laundry', authMiddleware, async (req, res) => {
+    const { rows } = await db.query(
+        `SELECT
+	        laundry_slots.id,
+            slot_date::TEXT AS slot_date,
+            slot_time,
+            max_students - COUNT(user_id) AS free_spots
+        FROM laundry_slots
+        LEFT JOIN laundry_bookings ON laundry_slots.id = laundry_bookings.slot_id
+        GROUP BY laundry_slots.id, max_students
+        ORDER BY slot_date, slot_time;`);
     res.json(rows);
 });
 
-app.post('/api/laundry/:id/book', authMiddleware, async (req, res) => {
+app.post('/laundry/:id/book', authMiddleware, async (req, res) => {
     const slotId = Number(req.params.id);
-    const slotRes = await db.query('SELECT max_students FROM laundry_slots WHERE id = $1', [slotId]);
-    if (!slotRes.rowCount) return res.status(404).json({ error: 'Слот не найден' });
+    const userId = req.user.id;
 
-    const bookedRes = await db.query('SELECT COUNT(*) FROM laundry_bookings WHERE slot_id = $1 AND status = $2', [slotId, 'booked']);
-    if (Number(bookedRes.rows[0].count) >= slotRes.rows[0].max_students) return res.status(409).json({ error: 'Слот заполнен' });
+    const existing = await db.query(
+        'SELECT id FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
+        [slotId, userId]
+    );
 
-    await db.query('INSERT INTO laundry_bookings (slot_id, student_id, status, created_at) VALUES ($1,$2,$3,NOW())', [slotId, req.user.id, 'booked']);
+    if (existing.rows.length > 0) {
+        return res.status(409).json({ error: 'Вы уже записаны на этот слот' });
+    }
+
+    await db.query('INSERT INTO laundry_bookings (slot_id, user_id) VALUES ($1,$2)', [slotId, userId]);
     res.json({ status: 'ok' });
 });
 
-app.get('/api/shifts', authMiddleware, async (req, res) => {
+app.get('/shifts', authMiddleware, async (req, res) => {
     const { rows } = await db.query('SELECT s.id, s.worker_id, s.date, s.from_time, s.to_time, s.status, u.name AS worker_name FROM shifts s JOIN users u ON u.id = s.worker_id ORDER BY s.date, s.from_time');
     res.json(rows);
 });
 
-app.post('/api/shifts', authMiddleware, async (req, res) => {
+app.post('/shifts', authMiddleware, async (req, res) => {
     if (req.user.role !== 'worker' && req.user.role !== 'admin') return res.status(403).json({ error: 'Требуется роль работника или админа' });
     const { date, from_time, to_time, capacity } = req.body;
     if (!date || !from_time || !to_time || !capacity) return res.status(400).json({ error: 'Заполните обязательные поля' });
@@ -112,12 +133,12 @@ app.post('/api/shifts', authMiddleware, async (req, res) => {
     res.json(rows[0]);
 });
 
-app.get('/api/events', authMiddleware, async (req, res) => {
+app.get('/events', authMiddleware, async (req, res) => {
     const { rows } = await db.query('SELECT e.id, e.title, e.description, e.date_start, e.date_end, e.max_participants, u.name AS author_name FROM events e JOIN users u ON u.id = e.author_id WHERE e.status = $1 ORDER BY e.date_start DESC', ['published']);
     res.json(rows);
 });
 
-app.post('/api/events', authMiddleware, async (req, res) => {
+app.post('/events', authMiddleware, async (req, res) => {
     const { title, description, date_start, date_end, max_participants } = req.body;
     if (!title || !date_start || !date_end) return res.status(400).json({ error: 'Заполните обязательные поля' });
 
@@ -125,7 +146,7 @@ app.post('/api/events', authMiddleware, async (req, res) => {
     res.json(rows[0]);
 });
 
-app.post('/api/events/:id/join', authMiddleware, async (req, res) => {
+app.post('/events/:id/join', authMiddleware, async (req, res) => {
     const eventId = Number(req.params.id);
     const event = await db.query('SELECT max_participants FROM events WHERE id = $1', [eventId]);
     if (!event.rowCount) return res.status(404).json({ error: 'Событие не найдено' });
@@ -139,12 +160,12 @@ app.post('/api/events/:id/join', authMiddleware, async (req, res) => {
     res.json({ status: 'ok' });
 });
 
-app.get('/api/notices', authMiddleware, async (req, res) => {
+app.get('/notices', authMiddleware, async (req, res) => {
     const { rows } = await db.query('SELECT id, title, body, published_at FROM notices WHERE is_public = true ORDER BY published_at DESC');
     res.json(rows);
 });
 
-app.post('/api/notices', authMiddleware, async (req, res) => {
+app.post('/notices', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'Только админ' });
     const { title, body, is_public } = req.body;
     if (!title || !body) return res.status(400).json({ error: 'Заполните поля' });

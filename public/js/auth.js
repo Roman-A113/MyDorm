@@ -10,8 +10,8 @@ loginForm.addEventListener('submit', async (event) => {
 
     try {
         const result = await login(email, password);
-        localStorage.setItem('dorm6_token', result.token);
-        window.location.href = 'dashboard.html';
+        localStorage.setItem('token', result.token);
+        window.location.href = 'mainmenu.html';
     } catch (error) {
         authMessage.textContent = 'Не удалось войти: ' + error.message;
     }

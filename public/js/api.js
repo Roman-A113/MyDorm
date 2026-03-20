@@ -1,6 +1,6 @@
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'http://localhost:3000';
 
-const getToken = () => localStorage.getItem('dorm6_token');
+const getToken = () => localStorage.getItem('token');
 
 const getAuthHeaders = () => {
     const token = getToken();
@@ -22,11 +22,20 @@ async function apiRequest(path, options = {}) {
     }
 
     const res = await fetch(`${API_BASE}${path}`, params);
-    if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText || 'API error');
+    let payload;
+
+    try {
+        payload = await res.json();
+    } catch (_) {
+        payload = null;
     }
-    return res.json();
+
+    if (!res.ok) {
+        const message = payload?.error || payload?.message || res.statusText || 'Ошибка запроса';
+        throw new Error(message);
+    }
+
+    return payload;
 }
 
 async function login(email, password) {
@@ -41,8 +50,8 @@ async function getCurrentUser() {
     return apiRequest('/user/me', { method: 'GET' });
 }
 
-async function getDashData() {
-    return apiRequest('/dashboard', { method: 'GET' });
+async function getMainMenuData() {
+    return apiRequest('/mainmenu', { method: 'GET' });
 }
 
 async function getLaundrySlots() {
@@ -51,6 +60,10 @@ async function getLaundrySlots() {
 
 async function bookLaundry(slotId) {
     return apiRequest(`/laundry/${slotId}/book`, { method: 'POST' });
+}
+
+async function createLaundrySlot(payload) {
+    return apiRequest('/laundry', { method: 'POST', body: payload });
 }
 
 async function getShifts() {
