@@ -11,19 +11,24 @@
 <body>
     <main class="auth-page">
         <div class="auth-card">
-            <h2>Войти</h2>
-            <form id="loginForm">
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                <label>ФИО<input type="text" name="name" required /></label>
                 <label>Почта<input type="email" name="email" required /></label>
                 <label>Пароль<input type="password" name="password" required minlength="6" /></label>
-                <button type="submit">Войти</button>
+                <label>Роль<select name="role" required>
+                        <option value="student">Студент</option>
+                        <option value="worker">Работник</option>
+                        <option value="admin">Администратор</option>
+                    </select></label>
+                <button type="submit">Зарегистрироваться</button>
             </form>
-            <hr />
         </div>
     </main>
 
     <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/login.js"></script>
+    <script src="js/registration.js"></script>
 </body>
 
 </html>
