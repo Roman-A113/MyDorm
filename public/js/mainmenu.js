@@ -1,10 +1,12 @@
 function renderNotification(text, type = 'error') {
     const msg = document.createElement('div');
-    msg.className = type === 'success' ? 'text-success' : 'text-error';
+    msg.className = `notification ${type === 'success' ? 'success' : 'error'}`;
     msg.textContent = text;
-    const main = document.querySelector('.mainmenu-content');
-    main.prepend(msg);
-    setTimeout(() => msg.remove(), 4000);
+    document.body.appendChild(msg);
+    setTimeout(() => {
+        msg.style.opacity = '0';
+        setTimeout(() => msg.remove(), 300);
+    }, 1000);
 }
 
 async function renderFeed() {

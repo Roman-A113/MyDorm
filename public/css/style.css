@@ -276,6 +276,43 @@ body {
     border: 1px solid #9ae6b4;
 }
 
+.notification {
+    position: fixed;
+    top: 20px;
+    /* Отступ сверху */
+    left: 20px;
+    /* Отступ слева */
+    z-index: 9999;
+    /* Поверх всех элементов */
+    padding: 12px 20px;
+    /* Внутренние отступы */
+    border-radius: 6px;
+    /* Скругление углов */
+    color: white;
+    /* Цвет текста */
+    font-weight: 500;
+    /* Жирность шрифта */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    /* Тень */
+    max-width: 300px;
+    /* Максимальная ширина */
+    transition: opacity 0.3s;
+    /* Плавное исчезновение */
+    opacity: 1;
+}
+
+/* Стиль для ошибки */
+.notification.error {
+    background-color: #dc3545;
+    /* Красный */
+}
+
+/* Стиль для успеха */
+.notification.success {
+    background-color: #28a745;
+    /* Зеленый */
+}
+
 .mainmenu-content h3 {
     margin-bottom: 1rem;
     font-size: 1.5rem;

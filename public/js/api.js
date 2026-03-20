@@ -23,7 +23,6 @@ async function apiRequest(path, options = {}) {
 
     const res = await fetch(`${API_BASE}${path}`, params);
     let payload;
-
     try {
         payload = await res.json();
     } catch (_) {

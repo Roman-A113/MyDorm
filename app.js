@@ -88,7 +88,33 @@ app.get('/mainmenu', authMiddleware, async (req, res) => {
     res.json({ laundry: laundry.rows, shifts: shifts.rows, events: events.rows, notices: notices.rows });
 });
 
+
+async function ensureTodaySlots() {
+    const today = new Date().toISOString().split('T')[0];
+    
+    await db.query(
+        `DELETE FROM laundry_slots
+        WHERE slot_date < $1
+    `, [today]);
+    
+    const { rows } = await db.query(
+        'SELECT id FROM laundry_slots WHERE slot_date = $1',
+        [today]
+    );
+
+    if (rows.length === 0) {
+        for (let hour = 8; hour < 24; hour++) {
+            const time = `${hour.toString().padStart(2, '0')}:00`;
+            await db.query(
+                'INSERT INTO laundry_slots (slot_date, slot_time) VALUES ($1, $2)',
+                [today, time]
+            );
+        }
+    }
+}
+
 app.get('/laundry', authMiddleware, async (req, res) => {
+    await ensureTodaySlots();
     const { rows } = await db.query(
         `SELECT
 	        laundry_slots.id,
@@ -107,12 +133,12 @@ app.post('/laundry/:id/book', authMiddleware, async (req, res) => {
     const userId = req.user.id;
 
     const existing = await db.query(
-        'SELECT id FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
-        [slotId, userId]
+        'SELECT id FROM laundry_bookings WHERE user_id = $1',
+        [userId]
     );
 
     if (existing.rows.length > 0) {
-        return res.status(409).json({ error: 'Вы уже записаны на этот слот' });
+        return res.status(409).json({ error: 'Вы уже записаны на стирку' });
     }
 
     await db.query('INSERT INTO laundry_bookings (slot_id, user_id) VALUES ($1,$2)', [slotId, userId]);
