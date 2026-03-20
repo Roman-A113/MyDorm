@@ -49,6 +49,20 @@ body {
     background: var(--accent-dark)
 }
 
+.btn-cancel {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: .45rem;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-cancel:hover {
+    background-color: #c82333;
+}
+
 .content {
     max-width: 1000px;
     margin: 2rem auto;
@@ -237,6 +251,7 @@ body {
     padding: .75rem 1rem;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
+    text-align: center;
 }
 
 .simple-table th {

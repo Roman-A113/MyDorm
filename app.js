@@ -91,12 +91,12 @@ app.get('/mainmenu', authMiddleware, async (req, res) => {
 
 async function ensureTodaySlots() {
     const today = new Date().toISOString().split('T')[0];
-    
+
     await db.query(
         `DELETE FROM laundry_slots
         WHERE slot_date < $1
     `, [today]);
-    
+
     const { rows } = await db.query(
         'SELECT id FROM laundry_slots WHERE slot_date = $1',
         [today]
@@ -118,13 +118,18 @@ app.get('/laundry', authMiddleware, async (req, res) => {
     const { rows } = await db.query(
         `SELECT
 	        laundry_slots.id,
-            slot_date::TEXT AS slot_date,
             slot_time,
-            max_students - COUNT(user_id) AS free_spots
+            max_students - COUNT(user_id) AS free_spots,
+            EXISTS(
+                SELECT 1
+                FROM laundry_bookings
+                WHERE laundry_bookings.slot_id = laundry_slots.id
+                AND laundry_bookings.user_id = $1
+            ) AS is_booked_by_user
         FROM laundry_slots
         LEFT JOIN laundry_bookings ON laundry_slots.id = laundry_bookings.slot_id
         GROUP BY laundry_slots.id, max_students
-        ORDER BY slot_date, slot_time;`);
+        ORDER BY slot_date, slot_time;`, [req.user.id]);
     res.json(rows);
 });
 
@@ -143,6 +148,35 @@ app.post('/laundry/:id/book', authMiddleware, async (req, res) => {
 
     await db.query('INSERT INTO laundry_bookings (slot_id, user_id) VALUES ($1,$2)', [slotId, userId]);
     res.json({ status: 'ok' });
+});
+
+app.delete('/laundry/:id/cancel', authMiddleware, async (req, res) => {
+    const slotId = Number(req.params.id);
+    const userId = req.user.id;
+
+    try {
+        // ✅ Проверяем, есть ли бронь у этого пользователя на этот слот
+        const existing = await db.query(
+            'SELECT id FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
+            [slotId, userId]
+        );
+
+        if (existing.rows.length === 0) {
+            return res.status(404).json({ error: 'Запись не найдена' });
+        }
+
+        // ✅ Удаляем бронь
+        await db.query(
+            'DELETE FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
+            [slotId, userId]
+        );
+
+        res.json({ status: 'ok' });
+
+    } catch (error) {
+        console.error('Ошибка отмены брони:', error);
+        return res.status(500).json({ error: 'Ошибка сервера' });
+    }
 });
 
 app.get('/shifts', authMiddleware, async (req, res) => {

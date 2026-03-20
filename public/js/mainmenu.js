@@ -23,23 +23,24 @@ async function renderLaundry() {
     const panel = document.getElementById('laundry');
     try {
         const slots = await getLaundrySlots();
-        const tableRows = slots.map((slot) =>
-            `<tr>
-                <td>${slot.slot_date}</td>
+        const tableRows = slots.map((slot) => {
+            const actionCell = slot.is_booked_by_user
+                ? `<button data-id="${slot.id}" class="btn btn-cancel cancelLaundry">Отменить</button>`
+                : `<button data-id="${slot.id}" class="btn bookLaundry">Записаться</button>`;
+
+            return `<tr>
                 <td>${slot.slot_time}</td>
                 <td>${slot.free_spots}</td>
-                <td>
-                    <button data-id="${slot.id}" class="btn bookLaundry">Записаться</button>
-                </td>
-            </tr>`).join('');
+                <td>${actionCell}</td>
+            </tr>`;
+        }).join('');
 
         panel.innerHTML = `<h3>Стирка</h3>
                 <table class="simple-table">
                     <thead>
                         <tr>
-                            <th>Дата</th>
                             <th>Время</th>
-                            <th>Количество свободных машинок</th>
+                            <th>Свободно мест</th>
                             <th>Действие</th>
                         </tr>
                     </thead>
@@ -49,7 +50,7 @@ async function renderLaundry() {
         panel.querySelectorAll('.bookLaundry').forEach((btn) => {
             btn.addEventListener('click', async () => {
                 try {
-                    await bookLaundry(btn.dataset.id);
+                    await apiRequest(`/laundry/${btn.dataset.id}/book`, { method: 'POST' });
                     renderNotification('Вы успешно записались на стирку', 'success');
                     await renderLaundry();
                 } catch (error) {
@@ -57,6 +58,19 @@ async function renderLaundry() {
                 }
             });
         });
+
+        panel.querySelectorAll('.cancelLaundry').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                try {
+                    await apiRequest(`/laundry/${btn.dataset.id}/cancel`, { method: 'DELETE' });
+                    renderNotification('Запись отменена', 'success');
+                    await renderLaundry();
+                } catch (error) {
+                    renderNotification(error.message);
+                }
+            });
+        });
+
     } catch (error) {
         renderNotification('Не удалось получить слоты стирки: ' + error.message);
     }
