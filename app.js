@@ -155,7 +155,6 @@ app.delete('/laundry/:id/cancel', authMiddleware, async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // ✅ Проверяем, есть ли бронь у этого пользователя на этот слот
         const existing = await db.query(
             'SELECT id FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
             [slotId, userId]
@@ -165,7 +164,6 @@ app.delete('/laundry/:id/cancel', authMiddleware, async (req, res) => {
             return res.status(404).json({ error: 'Запись не найдена' });
         }
 
-        // ✅ Удаляем бронь
         await db.query(
             'DELETE FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
             [slotId, userId]
