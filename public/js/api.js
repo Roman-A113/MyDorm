@@ -22,16 +22,10 @@ async function apiRequest(path, options = {}) {
     }
 
     const res = await fetch(`${API_BASE}${path}`, params);
-    let payload;
-    try {
-        payload = await res.json();
-    } catch (_) {
-        payload = null;
-    }
 
+    let payload = await res.json();
     if (!res.ok) {
-        const message = payload?.error || payload?.message || res.statusText || 'Ошибка запроса';
-        throw new Error(message);
+        throw new Error(payload.error);
     }
 
     return payload;
