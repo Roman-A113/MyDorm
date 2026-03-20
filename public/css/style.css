@@ -370,6 +370,10 @@ body {
     gap: .5rem;
 }
 
+.features ul {
+    list-style-position: inside;
+    padding-left: 0;
+}
 
 @media (max-width:760px) {
     .topbar {
