@@ -52,12 +52,32 @@ async function getCurrentUser() {
     return handleResponse(res);
 }
 
-async function getMainMenuData() {
-    const path = '/mainmenu';
-    const res = await fetch(`${API_BASE}${path}`, { method: 'GET' });
+async function getAnnouncements() {
+    const path = '/announcements';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        }
+    });
 
     return handleResponse(res);
 }
+
+async function createAnnouncement(payload) {
+    const path = '/announcements';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: JSON.stringify(payload)
+    });
+
+    return handleResponse(res);
+}
+
 
 async function getLaundrySlots() {
     const path = '/laundry';

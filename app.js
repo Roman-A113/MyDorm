@@ -82,15 +82,6 @@ app.get('/user/me', authMiddleware, async (req, res) => {
     res.json(user);
 });
 
-app.get('/mainmenu', authMiddleware, async (req, res) => {
-    const [laundry] = await Promise.all([
-        db.query("SELECT id, slot_date, slot_time, machine_number, max_students, (max_students - COALESCE((SELECT COUNT(*) FROM laundry_bookings lb WHERE lb.slot_id=ls.id AND status = 'booked'),0)) AS free_spots FROM laundry_slots ls ORDER BY slot_date, slot_time"),
-    ]);
-
-    res.json({ laundry: laundry.rows });
-});
-
-
 async function ensureTodaySlots() {
     const today = new Date().toISOString().split('T')[0];
 
@@ -220,17 +211,17 @@ app.post('/events/:id/join', authMiddleware, async (req, res) => {
     res.json({ status: 'ok' });
 });
 
-app.get('/notices', authMiddleware, async (req, res) => {
-    const { rows } = await db.query('SELECT id, title, body, published_at FROM notices WHERE is_public = true ORDER BY published_at DESC');
+app.get('/announcements', authMiddleware, async (req, res) => {
+    const { rows } = await db.query('SELECT id, title, body, published_at FROM announcements ORDER BY published_at DESC');
     res.json(rows);
 });
 
-app.post('/notices', authMiddleware, async (req, res) => {
+app.post('/announcements', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'Только админ' });
-    const { title, body, is_public } = req.body;
+    const { title, body } = req.body;
     if (!title || !body) return res.status(400).json({ error: 'Заполните поля' });
 
-    const { rows } = await db.query('INSERT INTO notices (author_id, title, body, is_public, published_at) VALUES ($1,$2,$3,$4,NOW()) RETURNING *', [req.user.id, title, body, is_public ?? true]);
+    const { rows } = await db.query('INSERT INTO announcements (title, body, author_id, published_at) VALUES ($1,$2,$3,NOW()) RETURNING *', [title, body, req.user.id]);
     res.json(rows[0]);
 });
 
