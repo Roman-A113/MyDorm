@@ -12,9 +12,8 @@ registerForm.addEventListener('submit', async (event) => {
 
     try {
         await register(payload);
-        authMessage.textContent = 'Регистрация прошла успешно, выполните вход.';
-        authMessage.style.color = '#2f855a';
         registerForm.reset();
+        window.location.href = 'login.html';
     } catch (error) {
         renderNotification(error.message);
     }

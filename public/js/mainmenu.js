@@ -39,7 +39,7 @@ async function renderLaundry() {
         panel.querySelectorAll('.bookLaundry').forEach((btn) => {
             btn.addEventListener('click', async () => {
                 try {
-                    await apiRequest(`/laundry/${btn.dataset.id}/book`, { method: 'POST' });
+                    await bookLaundry(btn.dataset.id);
                     renderNotification('Вы успешно записались на стирку', 'success');
                     await renderLaundry();
                 } catch (error) {
@@ -51,7 +51,7 @@ async function renderLaundry() {
         panel.querySelectorAll('.cancelLaundry').forEach((btn) => {
             btn.addEventListener('click', async () => {
                 try {
-                    await apiRequest(`/laundry/${btn.dataset.id}/cancel`, { method: 'DELETE' });
+                    await cancelLaundry(btn.dataset.id);
                     renderNotification('Запись отменена', 'success');
                     await renderLaundry();
                 } catch (error) {
@@ -220,11 +220,7 @@ async function loadMainMenu() {
         window.currentUser = profile;
         document.querySelector('.topbar h1').textContent = `${profile.name} (${profile.role})`;
 
-        await renderFeed();
         await renderLaundry();
-        await renderShifts();
-        await renderEvents();
-        await renderNotices();
     } catch (error) {
         renderNotification('Ошибка загрузки дашборда: ' + error.message);
         if (error.message.includes('401')) {

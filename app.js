@@ -16,37 +16,14 @@ function generateToken(user) {
     return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
 }
 
-async function getUserById(id) {
-    const { rows } = await db.query(
-        `SELECT id, name, email, role, profession, room 
-         FROM users
-         WHERE id = ${id}`);
-
-    if (rows.length === 0) {
-        throw new Error(`Пользователь c id ${id} не найден`);
-    }
-    return rows[0];
-}
-
-function authMiddleware(req, res, next) {
-    const auth = req.headers.authorization;
-    if (!auth) return res.status(401).json({ error: 'Unauthorized' });
-    const token = auth.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (e) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
-}
-
 app.post('/auth/register', async (req, res) => {
     const { name, email, password, role, profession, room } = req.body;
-    if (!name || !email || !password || !role) return res.status(400).json({ error: 'Некорректные данные' });
+    if (!name || !email || !password || !role)
+        return res.status(400).send('Некорректные данные');
 
     const exists = await db.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (exists.rows.length) return res.status(409).json({ error: 'Пользователь уже существует' });
+    if (exists.rows.length)
+        return res.status(409).send('Данный пользователь уже существует');
 
     const hash = await bcrypt.hash(password, 10);
     const result = await db.query(
@@ -62,15 +39,43 @@ app.post('/auth/login', async (req, res) => {
     const { rows } = await db.query(`SELECT id, name, email, role, password_hash FROM users WHERE email = '${email}'`);
     const user = rows[0];
     if (!user)
-        return res.status(401).json({ error: 'Неверные учетные данные' });
+        return res.status(401).send('Такого пользователя не существует');
 
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok)
-        return res.status(401).json({ error: 'Неверные учетные данные' });
+        return res.status(401).send('Неверный пароль');
 
     const token = generateToken(user);
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 });
+
+
+async function getUserById(id) {
+    const { rows } = await db.query(
+        `SELECT id, name, email, role, profession, room 
+         FROM users
+         WHERE id = ${id}`);
+
+    if (rows.length === 0) {
+        throw new Error(`Пользователь c id ${id} не найден`);
+    }
+    return rows[0];
+}
+
+
+function authMiddleware(req, res, next) {
+    const auth = req.headers.authorization;
+    if (!auth)
+        return res.status(401).send('Unauthorized');
+    const token = auth.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (e) {
+        return res.status(401).send('Invalid token');
+    }
+}
 
 app.get('/user/me', authMiddleware, async (req, res) => {
     const user = await getUserById(req.user.id);
@@ -78,14 +83,11 @@ app.get('/user/me', authMiddleware, async (req, res) => {
 });
 
 app.get('/mainmenu', authMiddleware, async (req, res) => {
-    const [laundry, shifts, events, notices] = await Promise.all([
+    const [laundry] = await Promise.all([
         db.query("SELECT id, slot_date, slot_time, machine_number, max_students, (max_students - COALESCE((SELECT COUNT(*) FROM laundry_bookings lb WHERE lb.slot_id=ls.id AND status = 'booked'),0)) AS free_spots FROM laundry_slots ls ORDER BY slot_date, slot_time"),
-        db.query('SELECT s.id, s.date, s.from_time AS from, s.to_time AS to, s.status, u.name AS worker_name FROM shifts s JOIN users u ON u.id = s.worker_id ORDER BY s.date, s.from_time'),
-        db.query("SELECT e.id, e.title, e.description, e.date_start, e.date_end, u.name AS author_name FROM events e JOIN users u ON u.id = e.author_id WHERE e.status = 'published' ORDER BY e.date_start DESC"),
-        db.query('SELECT id, title, body, published_at FROM notices WHERE is_public = TRUE ORDER BY published_at DESC LIMIT 20'),
     ]);
 
-    res.json({ laundry: laundry.rows, shifts: shifts.rows, events: events.rows, notices: notices.rows });
+    res.json({ laundry: laundry.rows });
 });
 
 
@@ -143,7 +145,7 @@ app.post('/laundry/:id/book', authMiddleware, async (req, res) => {
     );
 
     if (existing.rows.length > 0) {
-        return res.status(409).json({ error: 'Вы уже записаны на стирку' });
+        return res.status(409).send('Вы уже записаны на стирку');
     }
 
     await db.query('INSERT INTO laundry_bookings (slot_id, user_id) VALUES ($1,$2)', [slotId, userId]);
