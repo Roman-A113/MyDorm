@@ -195,7 +195,7 @@ app.get('/repairs/calendar', authMiddleware, async (req, res) => {
         // Получаем все активные записи на период
         const { rows } = await db.query(`
             SELECT 
-                slot_date,
+                slot_date::TEXT AS slot_date,
                 time_block,
                 student_id
             FROM repair_bookings
@@ -225,7 +225,7 @@ app.get('/repairs/calendar', authMiddleware, async (req, res) => {
         const { rows: mine } = await db.query(`
             SELECT 
                 id,
-                slot_date,
+                slot_date::TEXT AS slot_date,
                 time_block,
                 specialization,
                 problem_description,

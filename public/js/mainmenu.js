@@ -335,7 +335,6 @@ function openBookingModal(date, block) {
                         <option value="plumber">🔧 Сантехник</option>
                         <option value="electrician">⚡ Электрик</option>
                         <option value="carpenter">🪚 Плотник</option>
-                        <option value="general">🛠️ Универсал</option>
                     </select>
                 </label>
                 <label>Проблема:
