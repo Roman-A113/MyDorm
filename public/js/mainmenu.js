@@ -119,19 +119,12 @@ async function loadMainMenu() {
     }
 }
 
-
-// === Helpers ===
-
 const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
 const SPECIALIZATION_LABELS = {
     plumber: '🔧 Сантехник',
     electrician: '⚡ Электрик',
     carpenter: '🪚 Плотник',
 };
-
-function formatDate(date) {
-    return date.toISOString().split('T')[0];
-}
 
 function formatDisplayDate(dateStr) {
     const date = new Date(dateStr);
@@ -160,23 +153,21 @@ function getStatusLabel(status) {
     }[status] || status;
 }
 
-async function renderShifts() {
-    const panel = document.getElementById('shifts');
-    let html = '<h3>🔧 Запись на ремонт</h3>';
-    html += renderStudentCalendar();
-    panel.innerHTML = html;
-}
-
 function generateCalendarDays(startDate = new Date(), days = 14) {
     const result = [];
+    const date = new Date(startDate);
+
     for (let i = 0; i < days; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        result.push(formatDate(date));
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        result.push(`${year}-${month}-${day}`);
+
+        date.setDate(date.getDate() + 1);
     }
     return result;
 }
-
 
 async function renderStudentCalendar() {
     const data = await getRepairCalendar();
@@ -277,6 +268,14 @@ async function renderStudentCalendar() {
     document.getElementById('shifts').innerHTML = html;
     initCalendarEvents();
 }
+
+async function renderShifts() {
+    const panel = document.getElementById('shifts');
+    let html = '<h3>🔧 Запись на ремонт</h3>';
+    html += renderStudentCalendar();
+    panel.innerHTML = html;
+}
+
 
 function initCalendarEvents() {
     // === Раскрыть/скрыть день ===
