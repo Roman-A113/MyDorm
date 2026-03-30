@@ -127,3 +127,39 @@ async function createLaundrySlot(payload) {
 
     return handleResponse(res);
 }
+
+async function getRepairCalendar() {
+    const path = '/repairs/calendar';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        }
+    });
+    return handleResponse(res);
+}
+
+async function bookRepair(payload) {
+    const path = '/repairs/book';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: JSON.stringify(payload)
+    });
+    return handleResponse(res);
+}
+
+async function cancelBooking(bookingId) {
+    const path = `/repairs/bookings/${bookingId}`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        }
+    });
+    return handleResponse(res);
+}
+

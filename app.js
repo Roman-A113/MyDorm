@@ -17,7 +17,7 @@ function generateToken(user) {
 }
 
 app.post('/auth/register', async (req, res) => {
-    const { name, email, password, role, profession, room } = req.body;
+    const { name, email, password, role, room } = req.body;
     if (!name || !email || !password || !role)
         return res.status(400).send('Некорректные данные');
 
@@ -27,8 +27,8 @@ app.post('/auth/register', async (req, res) => {
 
     const hash = await bcrypt.hash(password, 10);
     const result = await db.query(
-        'INSERT INTO users (name, email, password_hash, role, profession, room) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, email, role',
-        [name, email, hash, role, profession || null, room || null]
+        'INSERT INTO users (name, email, password_hash, role, room) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, email, role',
+        [name, email, hash, role, room || null]
     );
     const token = generateToken(result.rows[0]);
     res.json({ token, user: result.rows[0] });
@@ -52,7 +52,7 @@ app.post('/auth/login', async (req, res) => {
 
 async function getUserById(id) {
     const { rows } = await db.query(
-        `SELECT id, name, email, role, profession, room 
+        `SELECT id, name, email, role, room 
          FROM users
          WHERE id = ${id}`);
 
@@ -170,47 +170,6 @@ app.delete('/laundry/:id/cancel', authMiddleware, async (req, res) => {
     }
 });
 
-app.get('/shifts', authMiddleware, async (req, res) => {
-    const { rows } = await db.query('SELECT s.id, s.worker_id, s.date, s.from_time, s.to_time, s.status, u.name AS worker_name FROM shifts s JOIN users u ON u.id = s.worker_id ORDER BY s.date, s.from_time');
-    res.json(rows);
-});
-
-app.post('/shifts', authMiddleware, async (req, res) => {
-    if (req.user.role !== 'worker' && req.user.role !== 'admin') return res.status(403).json({ error: 'Требуется роль работника или админа' });
-    const { date, from_time, to_time, capacity } = req.body;
-    if (!date || !from_time || !to_time || !capacity) return res.status(400).json({ error: 'Заполните обязательные поля' });
-
-    const { rows } = await db.query('INSERT INTO shifts (worker_id, date, from_time, to_time, capacity, status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *', [req.user.id, date, from_time, to_time, capacity, 'open']);
-    res.json(rows[0]);
-});
-
-app.get('/events', authMiddleware, async (req, res) => {
-    const { rows } = await db.query('SELECT e.id, e.title, e.description, e.date_start, e.date_end, e.max_participants, u.name AS author_name FROM events e JOIN users u ON u.id = e.author_id WHERE e.status = $1 ORDER BY e.date_start DESC', ['published']);
-    res.json(rows);
-});
-
-app.post('/events', authMiddleware, async (req, res) => {
-    const { title, description, date_start, date_end, max_participants } = req.body;
-    if (!title || !date_start || !date_end) return res.status(400).json({ error: 'Заполните обязательные поля' });
-
-    const { rows } = await db.query('INSERT INTO events (author_id, title, description, date_start, date_end, max_participants, status) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *', [req.user.id, title, description || null, date_start, date_end, max_participants || null, 'published']);
-    res.json(rows[0]);
-});
-
-app.post('/events/:id/join', authMiddleware, async (req, res) => {
-    const eventId = Number(req.params.id);
-    const event = await db.query('SELECT max_participants FROM events WHERE id = $1', [eventId]);
-    if (!event.rowCount) return res.status(404).json({ error: 'Событие не найдено' });
-
-    if (event.rows[0].max_participants) {
-        const count = await db.query('SELECT COUNT(*) FROM event_participants WHERE event_id = $1', [eventId]);
-        if (Number(count.rows[0].count) >= event.rows[0].max_participants) return res.status(409).json({ error: 'Мероприятие заполнено' });
-    }
-
-    await db.query('INSERT INTO event_participants (event_id, user_id, role, signed_at) VALUES ($1,$2,$3,NOW())', [eventId, req.user.id, 'participant']);
-    res.json({ status: 'ok' });
-});
-
 app.get('/announcements', authMiddleware, async (req, res) => {
     const { rows } = await db.query('SELECT id, title, body, published_at FROM announcements ORDER BY published_at DESC');
     res.json(rows);
@@ -223,6 +182,97 @@ app.post('/announcements', authMiddleware, async (req, res) => {
 
     const { rows } = await db.query('INSERT INTO announcements (title, body, author_id, published_at) VALUES ($1,$2,$3,NOW()) RETURNING *', [title, body, req.user.id]);
     res.json(rows[0]);
+});
+
+app.get('/repairs/calendar', authMiddleware, async (req, res) => {
+    try {
+        // Период: сегодня + 14 дней
+        const start = new Date().toISOString().split('T')[0];
+        const end = new Date();
+        end.setDate(end.getDate() + 14);
+        const endStr = end.toISOString().split('T')[0];
+
+        // Получаем все активные записи на период
+        const { rows } = await db.query(`
+            SELECT 
+                slot_date,
+                time_block,
+                student_id
+            FROM repair_bookings
+            WHERE slot_date BETWEEN $1 AND $2
+              AND status IN ('pending', 'accepted')
+            ORDER BY slot_date, time_block
+        `, [start, endStr]);
+
+        // Группируем по слотам: { "2024-04-01|09-12": { count: 2, user_ids: [5, 8] } }
+        const slotsInfo = {};
+
+        rows.forEach(row => {
+            const key = `${row.slot_date}|${row.time_block}`;
+
+            if (!slotsInfo[key]) {
+                slotsInfo[key] = {
+                    count: 0,
+                    user_ids: []
+                };
+            }
+
+            slotsInfo[key].count++;
+            slotsInfo[key].user_ids.push(row.student_id);
+        });
+
+        // Получаем записи текущего пользователя (для отображения его заявок)
+        const { rows: mine } = await db.query(`
+            SELECT 
+                id,
+                slot_date,
+                time_block,
+                specialization,
+                problem_description,
+                status
+            FROM repair_bookings
+            WHERE student_id = $1
+              AND slot_date BETWEEN $2 AND $3
+              AND status IN ('pending', 'accepted')
+        `, [req.user.id, start, endStr]);
+
+        res.json({
+            slotsInfo,      // { "дата|блок": { count, user_ids } }
+            myBookings: mine // [{ id, slot_date, time_block, ... }]
+        });
+
+    } catch (error) {
+        console.error('Error fetching calendar:', error);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.post('/repairs/book', authMiddleware, async (req, res) => {
+    const { slot_date, time_block, specialization, problem_description } = req.body;
+
+    await db.query(`
+            INSERT INTO repair_bookings (
+                slot_date,
+                time_block,
+                student_id,
+                specialization,
+                problem_description,
+                status
+            ) VALUES ($1, $2, $3, $4, $5, 'pending')
+        `, [slot_date, time_block, req.user.id, specialization, problem_description]);
+
+    res.json({ status: 'ok', message: 'Заявка успешно отправлена' });
+});
+
+app.delete('/repairs/bookings/:id', authMiddleware, async (req, res) => {
+    const bookingId = Number(req.params.id);
+
+    await db.query(`
+            DELETE FROM repair_bookings 
+            WHERE id = $1
+        `, [bookingId]);
+
+    res.json({ status: 'ok' });
 });
 
 const port = process.env.PORT || 3000;
