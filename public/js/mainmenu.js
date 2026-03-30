@@ -140,7 +140,7 @@ function getBlockLabel(blockName) {
         '15-18': '🌤️ Вечер (15:00–18:00)',
         '18-21': '🌙 Поздний вечер (18:00–21:00)'
     };
-    return labels[blockName] || blockName;
+    return labels[blockName];
 }
 
 function getStatusLabel(status) {
