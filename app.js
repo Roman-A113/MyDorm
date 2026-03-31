@@ -184,68 +184,43 @@ app.post('/announcements', authMiddleware, async (req, res) => {
     res.json(rows[0]);
 });
 
-app.get('/repairs/calendar', authMiddleware, async (req, res) => {
-    try {
-        // Период: сегодня + 14 дней
-        const start = new Date().toISOString().split('T')[0];
-        const end = new Date();
-        end.setDate(end.getDate() + 14);
-        const endStr = end.toISOString().split('T')[0];
 
-        // Получаем все активные записи на период
-        const { rows } = await db.query(`
-            SELECT 
-                slot_date::TEXT AS slot_date,
-                time_block,
-                student_id
-            FROM repair_bookings
-            WHERE slot_date BETWEEN $1 AND $2
-              AND status IN ('pending', 'accepted')
-            ORDER BY slot_date, time_block
-        `, [start, endStr]);
+const { generateCalendarDays } = require('./public/js/utils');
 
-        // Группируем по слотам: { "2024-04-01|09-12": { count: 2, user_ids: [5, 8] } }
-        const slotsInfo = {};
+app.get('/repair-calendar', authMiddleware, async (req, res) => {
+    const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
+    const days = generateCalendarDays();
+    const SPECIALISTS = ['plumber', 'electrician', 'carpenter'];
 
-        rows.forEach(row => {
-            const key = `${row.slot_date}|${row.time_block}`;
-
-            if (!slotsInfo[key]) {
-                slotsInfo[key] = {
-                    count: 0,
-                    user_ids: []
-                };
-            }
-
-            slotsInfo[key].count++;
-            slotsInfo[key].user_ids.push(row.student_id);
+    const bookings = {};
+    SPECIALISTS.forEach(spec => {
+        bookings[spec] = {};
+        days.forEach(day => {
+            bookings[spec][day] = {};
+            TIME_BLOCKS.forEach(block => {
+                bookings[spec][day][block] = [];
+            });
         });
+    });
 
-        // Получаем записи текущего пользователя (для отображения его заявок)
-        const { rows: mine } = await db.query(`
-            SELECT 
-                id,
-                slot_date::TEXT AS slot_date,
-                time_block,
-                specialization,
-                problem_description,
-                status
-            FROM repair_bookings
-            WHERE student_id = $1
-              AND slot_date BETWEEN $2 AND $3
-              AND status IN ('pending', 'accepted')
-        `, [req.user.id, start, endStr]);
+    const query = `
+        SELECT specialization, 
+            slot_date::TEXT as slot_date, 
+            time_block, 
+            JSON_AGG(JSON_BUILD_OBJECT('id', id, 'user_id', student_id, 'status', status, 'problem_description', problem_description)) AS slot_bookings
+        FROM repair_bookings
+        GROUP BY specialization, slot_date, time_block
+    `;
+    const rows = await db.query(query);
 
-        res.json({
-            slotsInfo,      // { "дата|блок": { count, user_ids } }
-            myBookings: mine // [{ id, slot_date, time_block, ... }]
-        });
+    rows.rows.forEach(row => {
+        const { specialization, slot_date, time_block, slot_bookings } = row;
+        bookings[specialization][slot_date][time_block] = slot_bookings;
+    });
 
-    } catch (error) {
-        console.error('Error fetching calendar:', error);
-        res.status(500).json({ error: 'Ошибка сервера' });
-    }
+    res.json(bookings);
 });
+
 
 app.post('/repairs/book', authMiddleware, async (req, res) => {
     const { slot_date, time_block, specialization, problem_description } = req.body;

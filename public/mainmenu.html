@@ -26,7 +26,18 @@
     <main class="mainmenu-content">
         <section id="announcements" class="tab active"></section>
         <section id="laundry" class="tab hidden"></section>
-        <section id="shifts" class="tab hidden"></section>
+        <section id="shifts" class="tab hidden">
+            <div class="specialist-filter">
+                <label for="specialist-select">🔧 Специалист:</label>
+                <select id="specialist-select" class="form-select">
+                    <option value="plumber">Сантехник</option>
+                    <option value="electrician">Электрик</option>
+                    <option value="carpenter">Плотник</option>
+                </select>
+            </div>
+
+            <div id="calendar-content"></div>
+        </section>
         <section id="events" class="tab hidden"></section>
     </main>
 

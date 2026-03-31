@@ -128,8 +128,8 @@ async function createLaundrySlot(payload) {
     return handleResponse(res);
 }
 
-async function getRepairCalendar() {
-    const path = '/repairs/calendar';
+async function getRepairCalendar(specialistId = null) {
+    const path = '/repair-calendar';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'GET',
         headers: {

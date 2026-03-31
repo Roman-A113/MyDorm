@@ -120,6 +120,7 @@ async function loadMainMenu() {
 }
 
 const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
+const MAX_BOOKINGS = 4;
 const SPECIALIZATION_LABELS = {
     plumber: '🔧 Сантехник',
     electrician: '⚡ Электрик',
@@ -133,16 +134,6 @@ function formatDisplayDate(dateStr) {
     });
 }
 
-function getBlockLabel(blockName) {
-    const labels = {
-        '09-12': '🌅 Утро (09:00–12:00)',
-        '12-15': '☀️ День (12:00–15:00)',
-        '15-18': '🌤️ Вечер (15:00–18:00)',
-        '18-21': '🌙 Поздний вечер (18:00–21:00)'
-    };
-    return labels[blockName];
-}
-
 function getStatusLabel(status) {
     return {
         pending: '⏳ Ожидает',
@@ -150,130 +141,154 @@ function getStatusLabel(status) {
         rejected: '❌ Отклонено',
         completed: '🎉 Выполнено',
         cancelled: '🚫 Отменено'
-    }[status] || status;
+    }[status];
 }
 
-function generateCalendarDays(startDate = new Date(), days = 14) {
-    const result = [];
-    const date = new Date(startDate);
+function getTimeLabel(block) {
+    return {
+        '09-12': '🌅 Утро (09:00–12:00)',
+        '12-15': '☀️ День (12:00–15:00)',
+        '15-18': '🌤️ Вечер (15:00–18:00)',
+        '18-21': '🌙 Поздний вечер (18:00–21:00)'
+    }[block];
+}
 
-    for (let i = 0; i < days; i++) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
 
-        result.push(`${year}-${month}-${day}`);
-
-        date.setDate(date.getDate() + 1);
+function renderTimeSlot(day, time, slotBookings) {
+    const freeSpots = MAX_BOOKINGS - slotBookings.length;
+    const myBooking = slotBookings.find(b => b.user_id === window.currentUser.id);
+    if (myBooking) {
+        return `
+            <div class="slot-card booked" data-booking-id="${myBooking.id}">
+                <div class="slot-header">
+                    <span class="slot-time">${getTimeLabel(time)}</span>
+                    <span class="status-badge status-${getStatusLabel(myBooking.status)}">
+                        ${getStatusLabel(myBooking.status)}
+                    </span>
+                </div>
+                <p class="slot-problem">${myBooking.problem_description}</p>
+                <button class="btn btn-sm btn-cancel" data-booking-id="${myBooking.id}">
+                    Отменить
+                </button>
+            </div>
+        `;
     }
-    return result;
+
+    if (freeSpots == 0) {
+        return `
+            <div class="slot-card full">
+                <div class="slot-header">
+                    <span class="slot-time">${getTimeLabel(time)}</span>
+                    <span class="status-full">🔴 Мест нет</span>
+                </div>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="slot-card available" data-date="${day}" data-block="${time}">
+            <div class="slot-header">
+                <span class="slot-time">${getTimeLabel(time)}</span>
+                <span class="free-spots">🟢 ${freeSpots} мест</span>
+            </div>
+            <button class="btn btn-sm btn-primary" data-date="${day}" data-block="${time}">
+                Записаться
+            </button>
+        </div>
+    `;
 }
 
-async function renderStudentCalendar() {
-    const data = await getRepairCalendar();
-    const daysData = generateCalendarDays();
-    const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
-    const MAX_BOOKINGS = 4;
-    const currentUserId = window.currentUser?.id;
+function renderDaySlotsRow(day, dayBookings) {
+    let slotsHtml = '';
 
-    // Мои записи для быстрого поиска
-    const myBookingsMap = {};
-    data.myBookings?.forEach(b => {
-        // Извлекаем только дату (первые 10 символов)
-        const date = b.slot_date.split('T')[0];
-        myBookingsMap[`${date}|${b.time_block}`] = b;
+    TIME_BLOCKS.forEach(time => {
+        const slotBookings = dayBookings[time];
+        slotsHtml += renderTimeSlot(day, time, slotBookings);
     });
 
-    let html = `
-        <div class="calendar-wrapper">
-            <table class="calendar-table">
-                <thead>
-                    <tr>
-                        <th class="col-date">Дата</th>
-                        <th class="col-action">Действие</th>
-                    </tr>
-                </thead>
-                <tbody>
+    return `
+        <tr class="calendar-row-slots hidden" data-date="${day}">
+            <td colspan="2">
+                <div class="slots-container">${slotsHtml}</div>
+            </td>
+        </tr>
     `;
+}
 
-    daysData.forEach(date => {
-        // Проверяем, есть ли в этом дне хотя бы один свободный слот
-        const hasFree = TIME_BLOCKS.some(block => {
-            const key = `${date}|${block}`;
-            const slotData = data.slotsInfo[key] || { count: 0 };
-            const booked = data.myBookings?.find(b => `${b.slot_date}|${b.time_block}` === key);
-            return booked || (MAX_BOOKINGS - slotData.count) > 0;
-        });
 
-        html += `
-            <tr class="calendar-row" data-date="${date}">
-                <td class="col-date">
-                    <button class="btn-toggle-day" data-date="${date}">
-                        <span class="toggle-icon">▶</span>
-                        <span class="date-text">${formatDisplayDate(date)}</span>
-                    </button>
-                </td>
-                <td class="col-action">
-                    ${hasFree ? '<span class="status-available">🟢 Есть места</span>' : '<span class="status-unavailable">⚪ Нет мест</span>'}
-                </td>
-            </tr>
-            <tr class="calendar-row-slots hidden" data-date="${date}">
-                <td colspan="2">
-                    <div class="slots-container">
+function createMyBookingsMap(myBookings) {
+    const map = {};
+    myBookings?.forEach(b => {
+        map[`${b.slot_date}|${b.time_block}`] = b;
+    });
+    return map;
+}
+
+function renderDayHeaderRow(date) {
+    return `
+        <tr class="calendar-row" data-date="${date}">
+            <td class="col-date">
+                <button class="btn-toggle-day" data-date="${date}">
+                    <span class="toggle-icon">▶</span>
+                    <span class="date-text">${formatDisplayDate(date)}</span>
+                </button>
+            </td>
+        </tr>
+    `;
+}
+
+async function renderStudentCalendar(specialist) {
+    const container = document.getElementById('calendar-content');
+
+    container.innerHTML = '<div class="loading">Загрузка календаря...</div>';
+
+    const bookings = await getRepairCalendar();
+    const days = generateCalendarDays();
+
+    let html = `
+            <div class="calendar-wrapper">
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th class="col-date">Дата</th>
+                            <th class="col-action">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
 
-        TIME_BLOCKS.forEach(block => {
-            const key = `${date}|${block}`;
-            const slotData = data.slotsInfo[key] || { count: 0, user_ids: [] };
-            const freeSpots = MAX_BOOKINGS - slotData.count;
-            const myBooking = myBookingsMap[key];
+    specialistBookings = bookings[specialist];
 
-            if (myBooking) {
-                html += `
-                    <div class="slot-card booked" data-booking-id="${myBooking.id}">
-                        <div class="slot-header">
-                            <span class="slot-time">${getBlockLabel(block)}</span>
-                            <span class="status-badge status-${myBooking.status}">${getStatusLabel(myBooking.status)}</span>
-                        </div>
-                        <p class="slot-problem">${myBooking.problem_description}</p>
-                        <button class="btn btn-sm btn-cancel" data-booking-id="${myBooking.id}">Отменить</button>
-                    </div>
-                `;
-            } else if (freeSpots <= 0) {
-                html += `
-                    <div class="slot-card full">
-                        <div class="slot-header">
-                            <span class="slot-time">${getBlockLabel(block)}</span>
-                            <span class="status-full">🔴 Мест нет</span>
-                        </div>
-                    </div>
-                `;
-            } else {
-                html += `
-                    <div class="slot-card available" data-date="${date}" data-block="${block}">
-                        <div class="slot-header">
-                            <span class="slot-time">${getBlockLabel(block)}</span>
-                            <span class="free-spots">🟢 ${freeSpots} мест</span>
-                        </div>
-                        <button class="btn btn-sm btn-primary" data-date="${date}" data-block="${block}">Записаться</button>
-                    </div>
-                `;
-            }
-        });
+    days.forEach(day => {
+        html += renderDayHeaderRow(day);
 
-        html += `</div></td></tr>`;
+        const dayBookings = specialistBookings[day];
+        html += renderDaySlotsRow(day, dayBookings);
     });
 
     html += `</tbody></table></div>`;
-    document.getElementById('shifts').innerHTML = html;
+
+    container.innerHTML = html;
+
+    initSpecialistFilter();
     initCalendarEvents();
 }
 
 async function renderShifts() {
-    const panel = document.getElementById('shifts');
-    let html = '<h3>🔧 Запись на ремонт</h3>';
-    html += renderStudentCalendar();
-    panel.innerHTML = html;
+    initSpecialistFilter();
+
+    const specialist = document.getElementById('specialist-select').value;
+    await renderStudentCalendar(specialist);
+}
+
+
+function initSpecialistFilter() {
+    const select = document.getElementById('specialist-select');
+
+    select.addEventListener('change', (e) => {
+        const specialistId = e.target.value;
+        renderStudentCalendar(specialistId);
+    });
 }
 
 
@@ -327,7 +342,7 @@ function openBookingModal(date, block) {
         <div class="modal-content">
             <h4>📝 Запись на ремонт</h4>
             <p><b>Дата:</b> ${formatDisplayDate(date)}</p>
-            <p><b>Время:</b> ${getBlockLabel(block)}</p>
+            <p><b>Время:</b> ${getTimeLabel(block)}</p>
             <form id="bookForm" class="simple-form">
                 <label>Специалист:
                     <select name="specialization" required>
