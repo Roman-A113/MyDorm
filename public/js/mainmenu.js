@@ -4,25 +4,6 @@ import { renderShifts } from './repairs.js';
 import { renderNotification } from './utils.js';
 import { getCurrentUser } from './api.js';
 
-async function loadMainMenu() {
-    try {
-        const profile = await getCurrentUser();
-        window.currentUser = profile;
-        document.querySelector('.topbar h1').textContent = `${profile.name} (${profile.role})`;
-
-        await renderAnnouncements();
-        await renderLaundry();
-        await renderShifts();
-    } catch (error) {
-        console.log(error);
-        renderNotification('Ошибка загрузки дашборда: ' + error.message);
-        if (error.message.includes('401')) {
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
-        }
-    }
-}
-
 function initLogout() {
     document.getElementById('logoutBtn').addEventListener('click', () => {
         localStorage.removeItem('token');
@@ -44,6 +25,25 @@ function initTabs() {
     document.querySelectorAll('.tabBtn').forEach((btn) => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
+}
+
+async function loadMainMenu() {
+    try {
+        const profile = await getCurrentUser();
+        window.currentUser = profile;
+        document.querySelector('.topbar h1').textContent = `${profile.name} (${profile.role})`;
+
+        await renderAnnouncements();
+        await renderLaundry();
+        await renderShifts();
+    } catch (error) {
+        console.log(error);
+        renderNotification('Ошибка загрузки дашборда: ' + error.message);
+        if (error.message.includes('401')) {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    }
 }
 
 window.addEventListener('DOMContentLoaded', () => {

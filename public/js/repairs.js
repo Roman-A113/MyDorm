@@ -1,24 +1,22 @@
 import { getRepairCalendar, bookRepair, cancelBooking } from './api.js';
 import { generateCalendarDays, renderNotification } from './utils.js';
 
-
 const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
 const MAX_BOOKINGS = 4;
-
-let selectedDate = null;
-
-const SPECIALIZATION_LABELS = {
-    plumber: '🔧 Сантехник',
-    electrician: '⚡ Электрик',
-    carpenter: '🪚 Плотник',
-};
-
 
 function formatDisplayDate(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('ru-RU', {
         weekday: 'short', day: 'numeric', month: 'short'
     });
+}
+
+function getSpecialistLabel(specialist) {
+    return {
+        plumber: 'Сантехник',
+        electrician: 'Электрик',
+        carpenter: 'Плотник'
+    }[specialist];
 }
 
 function getStatusLabel(status) {
@@ -102,18 +100,14 @@ async function renderStudentCalendar(specialist) {
 
 function initCalendarGridEvents(specialistBookings) {
     const dayCells = document.querySelectorAll('.calendar-day');
-    const detailsPanel = document.getElementById('day-details-panel');
 
     dayCells.forEach(cell => {
         cell.addEventListener('click', () => {
             const date = cell.dataset.date;
 
-            // Убираем активный класс у всех
             dayCells.forEach(c => c.classList.remove('active'));
-            // Добавляем текущему
             cell.classList.add('active');
 
-            selectedDate = date;
             renderDayDetails(date, specialistBookings[date] || {});
         });
     });
@@ -143,13 +137,11 @@ function renderDayDetails(date, dayBookings) {
         </div>
     `;
 
-    // Обработчик закрытия панели
     panel.querySelector('.close-details').addEventListener('click', () => {
         panel.classList.add('hidden');
         document.querySelectorAll('.calendar-day').forEach(c => c.classList.remove('active'));
     });
 
-    // Переинициализация кнопок внутри деталей
     initSlotActions();
 }
 
@@ -230,21 +222,15 @@ function initSpecialistFilter() {
 }
 
 function openBookingModal(date, block) {
+    const specialist = document.getElementById('specialist-select').value;
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
         <div class="modal-content">
-            <h4>📝 Запись на ремонт</h4>
+            <h4>📝 Запись на ремонт: ${getSpecialistLabel(specialist)}</h4>
             <p><b>Дата:</b> ${formatDisplayDate(date)}</p>
             <p><b>Время:</b> ${getTimeLabel(block)}</p>
             <form id="bookForm" class="simple-form">
-                <label>Специалист:
-                    <select name="specialization" required>
-                        <option value="plumber">🔧 Сантехник</option>
-                        <option value="electrician">⚡ Электрик</option>
-                        <option value="carpenter">🪚 Плотник</option>
-                    </select>
-                </label>
                 <label>Проблема:
                     <textarea name="problem_description" required placeholder="Опишите проблему..."></textarea>
                 </label>
@@ -268,13 +254,14 @@ function openBookingModal(date, block) {
             await bookRepair({
                 slot_date: date,
                 time_block: block,
-                specialization: fd.get('specialization'),
+                specialization: specialist,
                 problem_description: fd.get('problem_description')
             });
             renderNotification('✅ Заявка отправлена!', 'success');
             close();
             renderShifts();
         } catch (error) {
+            console.log(error);
             renderNotification('❌ ' + error.message);
         }
     };

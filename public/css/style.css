@@ -301,6 +301,7 @@ body {
     background: #f0fff4;
     border-radius: .5rem;
     border: 1px solid #9ae6b4;
+    white-space: nowrap;
 }
 
 .notification {
@@ -586,6 +587,7 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    white-space: nowrap;
 }
 
 .status-pending {
