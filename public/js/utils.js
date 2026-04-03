@@ -1,4 +1,4 @@
-function renderNotification(text, type = 'error') {
+export function renderNotification(text, type = 'error') {
     const msg = document.createElement('div');
     msg.className = `notification ${type === 'success' ? 'success' : 'error'}`;
     msg.textContent = text;
@@ -9,7 +9,7 @@ function renderNotification(text, type = 'error') {
     }, 1500);
 }
 
-function generateCalendarDays(startDate = new Date(), days = 14) {
+export function generateCalendarDays(startDate = new Date(), days = 14) {
     const result = [];
     const date = new Date(startDate);
 
@@ -23,8 +23,4 @@ function generateCalendarDays(startDate = new Date(), days = 14) {
         date.setDate(date.getDate() + 1);
     }
     return result;
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { generateCalendarDays };
 }

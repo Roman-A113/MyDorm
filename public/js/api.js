@@ -11,7 +11,7 @@ async function handleResponse(res) {
     return res_payload;
 }
 
-async function login(email, password) {
+export async function login(email, password) {
     const path = '/auth/login';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
@@ -24,7 +24,7 @@ async function login(email, password) {
     return handleResponse(res);
 }
 
-async function register(payload) {
+export async function register(payload) {
     const path = '/auth/register';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
@@ -39,7 +39,7 @@ async function register(payload) {
 
 const getToken = () => localStorage.getItem('token');
 
-async function getCurrentUser() {
+export async function getCurrentUser() {
     const path = '/user/me';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'GET',
@@ -52,7 +52,7 @@ async function getCurrentUser() {
     return handleResponse(res);
 }
 
-async function getAnnouncements() {
+export async function getAnnouncements() {
     const path = '/announcements';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'GET',
@@ -64,7 +64,7 @@ async function getAnnouncements() {
     return handleResponse(res);
 }
 
-async function createAnnouncement(payload) {
+export async function createAnnouncement(payload) {
     const path = '/announcements';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
@@ -79,7 +79,7 @@ async function createAnnouncement(payload) {
 }
 
 
-async function getLaundrySlots() {
+export async function getLaundrySlots() {
     const path = '/laundry';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'GET',
@@ -91,7 +91,7 @@ async function getLaundrySlots() {
     return handleResponse(res);
 }
 
-async function bookLaundry(slotId) {
+export async function bookLaundry(slotId) {
     const path = `/laundry/${slotId}/book`;
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
@@ -103,7 +103,7 @@ async function bookLaundry(slotId) {
     return handleResponse(res);
 }
 
-async function cancelLaundry(slotId) {
+export async function cancelLaundry(slotId) {
     const path = `/laundry/${slotId}/cancel`;
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'DELETE',
@@ -128,7 +128,7 @@ async function createLaundrySlot(payload) {
     return handleResponse(res);
 }
 
-async function getRepairCalendar(specialistId = null) {
+export async function getRepairCalendar(specialistId = null) {
     const path = '/repair-calendar';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'GET',
@@ -139,7 +139,7 @@ async function getRepairCalendar(specialistId = null) {
     return handleResponse(res);
 }
 
-async function bookRepair(payload) {
+export async function bookRepair(payload) {
     const path = '/repairs/book';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
@@ -152,7 +152,7 @@ async function bookRepair(payload) {
     return handleResponse(res);
 }
 
-async function cancelBooking(bookingId) {
+export async function cancelBooking(bookingId) {
     const path = `/repairs/bookings/${bookingId}`;
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'DELETE',

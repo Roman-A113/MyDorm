@@ -1,3 +1,6 @@
+import { renderNotification } from './utils.js';
+import { login } from './api.js';
+
 const loginForm = document.getElementById('loginForm');
 
 loginForm.addEventListener('submit', async (event) => {
@@ -11,6 +14,7 @@ loginForm.addEventListener('submit', async (event) => {
         localStorage.setItem('token', result.token);
         window.location.href = 'mainmenu.html';
     } catch (error) {
+        console.log(error);
         renderNotification(error.message);
     }
 });

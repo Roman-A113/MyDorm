@@ -1,3 +1,6 @@
+import { renderNotification } from './utils.js';
+import { register } from './api.js';
+
 const registerForm = document.getElementById('registerForm');
 
 registerForm.addEventListener('submit', async (event) => {
@@ -15,6 +18,7 @@ registerForm.addEventListener('submit', async (event) => {
         registerForm.reset();
         window.location.href = 'login.html';
     } catch (error) {
+        console.log(error);
         renderNotification(error.message);
     }
 });
