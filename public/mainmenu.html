@@ -25,9 +25,23 @@
 
     <main class="mainmenu-content">
         <section id="announcements" class="tab active"></section>
-        <section id="laundry" class="tab hidden"></section>
+        <section id="laundry" class="tab hidden">
+            <div class="filter">
+                <label for="laundry-select">🧺 Стиральная машинка:</label>
+                <select id="laundry-select" class="form-select">
+                    <option value="1">Машинка №1</option>
+                    <option value="2">Машинка №2</option>
+                    <option value="3">Машинка №3</option>
+                    <option value="4">Машинка №4</option>
+                    <option value="5">Машинка №5</option>
+                    <option value="6">Машинка №6</option>
+                    <option value="7">Машинка №7</option>
+                </select>
+            </div>
+            <div id="calendar-content-laundry"></div>
+        </section>
         <section id="shifts" class="tab hidden">
-            <div class="specialist-filter">
+            <div class="filter">
                 <label for="specialist-select">🔧 Специалист:</label>
                 <select id="specialist-select" class="form-select">
                     <option value="plumber">Сантехник</option>
@@ -36,7 +50,7 @@
                 </select>
             </div>
 
-            <div id="calendar-content"></div>
+            <div id="calendar-content-repair"></div>
         </section>
         <section id="events" class="tab hidden"></section>
     </main>

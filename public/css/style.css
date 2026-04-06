@@ -932,7 +932,7 @@ html {
 }
 
 
-.specialist-filter {
+.filter {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -944,7 +944,7 @@ html {
     flex-wrap: wrap;
 }
 
-.specialist-filter label {
+.filter label {
     font-weight: 600;
     color: #fff;
     white-space: nowrap;
@@ -952,7 +952,7 @@ html {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.specialist-filter .form-select {
+.filter .form-select {
     padding: 10px 40px 10px 16px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
@@ -969,29 +969,29 @@ html {
     background-position: right 12px center;
 }
 
-.specialist-filter .form-select:hover {
+.filter .form-select:hover {
     border-color: rgba(255, 255, 255, 0.6);
     transform: translateY(-1px);
 }
 
-.specialist-filter .form-select:focus {
+.filter .form-select:focus {
     outline: none;
     border-color: #fff;
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
 @media (max-width: 576px) {
-    .specialist-filter {
+    .filter {
         flex-direction: column;
         align-items: stretch;
         padding: 16px;
     }
 
-    .specialist-filter label {
+    .filter label {
         margin-bottom: 8px;
     }
 
-    .specialist-filter .form-select {
+    .filter .form-select {
         width: 100%;
     }
 }
