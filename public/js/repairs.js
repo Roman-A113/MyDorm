@@ -134,7 +134,7 @@ function openBookingModal(date, block) {
                 specialization: specialist,
                 problem_description: fd.get("problem_description"),
             });
-            renderNotification("✅ Заявка отправлена!", "success");
+            renderNotification("Заявка отправлена!", "success");
             close();
             const currentSpecialist =
                 document.getElementById("specialist-select").value;

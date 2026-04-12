@@ -6,6 +6,7 @@ import {
     DAY_STATUS,
     LAUNDRY_TIME_SLOTS,
     LAUNDRY_MACHINES,
+    renderNotification,
 } from "./utils.js";
 
 const CALENDAR_CONTAINER_ID = "calendar-content-laundry";
@@ -75,6 +76,8 @@ async function handleCancelBooking(
     if (!confirm(`Отменить бронь на ${time}?`)) return;
 
     await cancelLaundry(bookingId);
+    renderNotification("Слот отменен", "success");
+
     allLaundryBookings = await getAllLaundryBookings();
     renderLaundryCalendar(selectedMachineId);
     renderSlotsList(selectedMachineId, selectedDate);
@@ -84,7 +87,7 @@ async function handleBookingSubmit(selectedMachineId, selectedDate) {
     const slotsArray = Array.from(selectedSlots).sort();
 
     await bookLaundry(selectedMachineId, selectedDate, slotsArray);
-    alert("Успешно забронировано!");
+    renderNotification("Слоты успешно забронированы", "success");
 
     allLaundryBookings = await getAllLaundryBookings();
     selectedSlots.clear();
