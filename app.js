@@ -82,94 +82,6 @@ app.get('/user/me', authMiddleware, async (req, res) => {
     res.json(user);
 });
 
-async function ensureTodaySlots() {
-    const today = new Date().toISOString().split('T')[0];
-
-    await db.query(
-        `DELETE FROM laundry_slots
-        WHERE slot_date < $1
-    `, [today]);
-
-    const { rows } = await db.query(
-        'SELECT id FROM laundry_slots WHERE slot_date = $1',
-        [today]
-    );
-
-    if (rows.length === 0) {
-        for (let hour = 8; hour < 24; hour++) {
-            const time = `${hour.toString().padStart(2, '0')}:00`;
-            await db.query(
-                'INSERT INTO laundry_slots (slot_date, slot_time) VALUES ($1, $2)',
-                [today, time]
-            );
-        }
-    }
-}
-
-app.get('/laundry', authMiddleware, async (req, res) => {
-    await ensureTodaySlots();
-    const { rows } = await db.query(
-        `SELECT
-	        laundry_slots.id,
-            slot_time,
-            max_students - COUNT(user_id) AS free_spots,
-            EXISTS(
-                SELECT 1
-                FROM laundry_bookings
-                WHERE laundry_bookings.slot_id = laundry_slots.id
-                AND laundry_bookings.user_id = $1
-            ) AS is_booked_by_user
-        FROM laundry_slots
-        LEFT JOIN laundry_bookings ON laundry_slots.id = laundry_bookings.slot_id
-        GROUP BY laundry_slots.id, max_students
-        ORDER BY slot_date, slot_time;`, [req.user.id]);
-    res.json(rows);
-});
-
-app.post('/laundry/:id/book', authMiddleware, async (req, res) => {
-    const slotId = Number(req.params.id);
-    const userId = req.user.id;
-
-    const existing = await db.query(
-        'SELECT id FROM laundry_bookings WHERE user_id = $1',
-        [userId]
-    );
-
-    if (existing.rows.length > 0) {
-        return res.status(409).send('Вы уже записаны на стирку');
-    }
-
-    await db.query('INSERT INTO laundry_bookings (slot_id, user_id) VALUES ($1,$2)', [slotId, userId]);
-    res.json({ status: 'ok' });
-});
-
-app.delete('/laundry/:id/cancel', authMiddleware, async (req, res) => {
-    const slotId = Number(req.params.id);
-    const userId = req.user.id;
-
-    try {
-        const existing = await db.query(
-            'SELECT id FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
-            [slotId, userId]
-        );
-
-        if (existing.rows.length === 0) {
-            return res.status(404).json({ error: 'Запись не найдена' });
-        }
-
-        await db.query(
-            'DELETE FROM laundry_bookings WHERE slot_id = $1 AND user_id = $2',
-            [slotId, userId]
-        );
-
-        res.json({ status: 'ok' });
-
-    } catch (error) {
-        console.error('Ошибка отмены брони:', error);
-        return res.status(500).json({ error: 'Ошибка сервера' });
-    }
-});
-
 app.get('/announcements', authMiddleware, async (req, res) => {
     const { rows } = await db.query('SELECT id, title, body, published_at FROM announcements ORDER BY published_at DESC');
     res.json(rows);
@@ -221,7 +133,6 @@ app.get('/repair-calendar', authMiddleware, async (req, res) => {
     res.json(bookings);
 });
 
-
 app.post('/repairs/book', authMiddleware, async (req, res) => {
     const { slot_date, time_block, specialization, problem_description } = req.body;
 
@@ -249,6 +160,97 @@ app.delete('/repairs/bookings/:id', authMiddleware, async (req, res) => {
 
     res.json({ status: 'ok' });
 });
+
+
+app.post('/laundry/book', authMiddleware, async (req, res) => {
+    const { machine_id, date, slots } = req.body;
+
+    const userId = req.user.id;
+    const insertedBookings = [];
+
+    for (const timeSlot of slots) {
+        const checkQuery = `
+                SELECT id FROM laundry_bookings 
+                WHERE machine_id = $1 AND booking_date = $2 AND time_slot = $3 
+                FOR UPDATE
+            `;
+        const existing = await db.query(checkQuery, [machine_id, date, timeSlot]);
+
+        if (existing.rows.length > 0) {
+            throw new Error(`Слот ${timeSlot} уже занят кем-то другим.`);
+        }
+
+        const insertQuery = `
+                INSERT INTO laundry_bookings (machine_id, booking_date, time_slot, user_id)
+                VALUES ($1, $2, $3, $4)
+                RETURNING id, time_slot
+            `;
+        const result = await db.query(insertQuery, [machine_id, date, timeSlot, userId]);
+        insertedBookings.push(result.rows[0]);
+    }
+    res.json({ status: 'ok', bookings: insertedBookings });
+});
+
+
+app.delete('/laundry/cancel/:id', authMiddleware, async (req, res) => {
+    const bookingId = req.params.id;
+    await db.query('DELETE FROM laundry_bookings WHERE id = $1', [bookingId]);
+    res.json({ status: 'ok', message: 'Бронь отменена' });
+});
+
+
+app.get('/laundry/all-data', authMiddleware, async (req, res) => {
+    try {
+        const query = `
+            SELECT machine_id, 
+                   booking_date::TEXT as date, 
+                   time_slot, 
+                   user_id, 
+                   id as booking_id
+            FROM laundry_bookings
+        `;
+        const { rows } = await db.query(query);
+
+
+        MACHINE_IDS = [1, 2, 3, 4, 5, 6, 7];
+        const days = generateCalendarDays();
+        const TIME_SLOTS = [
+            "08:00-08:30", "08:30-09:00", "09:00-09:30", "09:30-10:00",
+            "10:00-10:30", "10:30-11:00", "11:00-11:30", "11:30-12:00",
+            "12:00-12:30", "12:30-13:00", "13:00-13:30", "13:30-14:00",
+            "14:00-14:30", "14:30-15:00", "15:00-15:30", "15:30-16:00",
+            "16:00-16:30", "16:30-17:00", "17:00-17:30", "17:30-18:00",
+            "18:00-18:30", "18:30-19:00", "19:00-19:30", "19:30-20:00",
+            "20:00-20:30", "20:30-21:00"
+        ];
+
+        const allBookings = {};
+        MACHINE_IDS.forEach(machine => {
+            allBookings[machine] = {};
+            days.forEach(day => {
+                allBookings[machine][day] = {};
+                TIME_SLOTS.forEach(slot => {
+                    allBookings[machine][day][slot] = {};
+                });
+            });
+        });
+
+        rows.forEach(row => {
+            const { machine_id, date, time_slot, user_id, booking_id } = row;
+
+            allBookings[machine_id][date][time_slot] = {
+                userId: user_id,
+                bookingId: booking_id
+            };
+        });
+
+        res.json(allBookings);
+    } catch (err) {
+        console.error('Ошибка получения данных стиралки:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

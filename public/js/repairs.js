@@ -2,7 +2,7 @@ import { getRepairCalendar, bookRepair, cancelBooking } from './api.js';
 import { generateCalendarDays, renderNotification, renderCalendarGrid, setupCalendarClicks, DAY_STATUS } from './utils.js';
 
 const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
-const MAX_BOOKINGS = 4;
+const MAX_BOOKINGS = 2;
 
 const CALENDAR_CONTAINER_ID = 'calendar-content-repair';
 const PANEL_ID = 'panel-repair';

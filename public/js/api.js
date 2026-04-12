@@ -78,56 +78,6 @@ export async function createAnnouncement(payload) {
     return handleResponse(res);
 }
 
-
-export async function getLaundrySlots() {
-    const path = '/laundry';
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${getToken()}`
-        }
-    });
-
-    return handleResponse(res);
-}
-
-export async function bookLaundry(slotId) {
-    const path = `/laundry/${slotId}/book`;
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${getToken()}`
-        }
-    });
-
-    return handleResponse(res);
-}
-
-export async function cancelLaundry(slotId) {
-    const path = `/laundry/${slotId}/cancel`;
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${getToken()}`
-        }
-    });
-
-    return handleResponse(res);
-}
-
-async function createLaundrySlot(payload) {
-    const path = '/laundry';
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-    });
-
-    return handleResponse(res);
-}
-
 export async function getRepairCalendar(specialistId = null) {
     const path = '/repair-calendar';
     const res = await fetch(`${API_BASE}${path}`, {
@@ -157,6 +107,60 @@ export async function cancelBooking(bookingId) {
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'DELETE',
         headers: {
+            'Authorization': `Bearer ${getToken()}`
+        }
+    });
+    return handleResponse(res);
+}
+
+
+export async function getLaundrySlots(machineId, date) {
+    const path = `/laundry/slots?machine_id=${machineId}&date=${date}`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+        }
+    });
+    return handleResponse(res);
+}
+
+export async function bookLaundry(machineId, date, slots) {
+    const path = '/laundry/book';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: JSON.stringify({
+            machine_id: machineId,
+            date: date,
+            slots: slots
+        })
+    });
+    return handleResponse(res);
+}
+
+export async function cancelLaundry(bookingId) {
+    const path = `/laundry/cancel/${bookingId}`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+        }
+    });
+    return handleResponse(res);
+}
+
+export async function getAllLaundryBookings() {
+    const path = '/laundry/all-data';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${getToken()}`
         }
     });

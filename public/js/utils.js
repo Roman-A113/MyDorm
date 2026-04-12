@@ -36,10 +36,6 @@ export function renderCalendarGrid(days, getDayStatus = () => '') {
 
     let html = `<div class="calendar-grid-wrapper">`;
 
-    html += `<div class="calendar-weekdays">
-        <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
-    </div>`;
-
     html += `<div class="calendar-grid">`;
 
     days.forEach(dateStr => {
