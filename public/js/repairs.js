@@ -1,5 +1,5 @@
 import { getRepairCalendar, bookRepair, cancelBooking } from './api.js';
-import { generateCalendarDays, renderNotification, renderCalendarGrid, setupCalendarClicks, DAY_STATUS, MAX_REPAIR_BOOKINGS, REPAIR_TIME_BLOCKS } from './utils.js';
+import { generateCalendarDays, renderNotification, renderCalendarGrid, setupCalendarClicks, DAY_STATUS, MAX_REPAIR_BOOKINGS, REPAIR_TIME_BLOCKS, REPAIR_SPECIALISTS } from './utils.js';
 
 const CALENDAR_CONTAINER_ID = 'calendar-content-repair';
 const PANEL_ID = 'panel-repair';
@@ -202,12 +202,15 @@ function renderRepairDayDetails(date, dayBookings) {
 
 function initSpecialistFilter() {
     const select = document.getElementById('specialist-select');
-    if (!select) return;
 
-    const newSelect = select.cloneNode(true);
-    select.parentNode.replaceChild(newSelect, select);
+    REPAIR_SPECIALISTS.forEach(specialist => {
+        const option = document.createElement('option');
+        option.value = specialist.id;
+        option.textContent = specialist.name;
+        select.appendChild(option);
+    });
 
-    newSelect.addEventListener('change', (e) => {
+    select.addEventListener('change', (e) => {
         const specialistId = e.target.value;
         renderRepairCalendar(specialistId);
     });

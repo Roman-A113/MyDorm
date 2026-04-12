@@ -97,20 +97,18 @@ app.post('/announcements', authMiddleware, async (req, res) => {
 });
 
 
-const { generateCalendarDays, LAUNDRY_TIME_SLOTS, LAUNDRY_MACHINES } = require('./public/js/utils');
+const { generateCalendarDays, LAUNDRY_TIME_SLOTS, LAUNDRY_MACHINES, REPAIR_TIME_BLOCKS, REPAIR_SPECIALISTS } = require('./public/js/utils');
 
 app.get('/repair-calendar', authMiddleware, async (req, res) => {
-    const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
     const days = generateCalendarDays();
-    const SPECIALISTS = ['plumber', 'electrician', 'carpenter'];
 
     const bookings = {};
-    SPECIALISTS.forEach(spec => {
-        bookings[spec] = {};
+    REPAIR_SPECIALISTS.forEach(spec => {
+        bookings[spec.id] = {};
         days.forEach(day => {
-            bookings[spec][day] = {};
-            TIME_BLOCKS.forEach(block => {
-                bookings[spec][day][block] = [];
+            bookings[spec.id][day] = {};
+            REPAIR_TIME_BLOCKS.forEach(block => {
+                bookings[spec.id][day][block] = [];
             });
         });
     });

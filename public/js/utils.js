@@ -7,7 +7,6 @@ export const LAUNDRY_TIME_SLOTS = [
     "18:00-18:30", "18:30-19:00", "19:00-19:30", "19:30-20:00",
     "20:00-20:30", "20:30-21:00"
 ];
-export const REPAIR_TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
 
 export const LAUNDRY_MACHINES = [
     { id: 1, name: 'Машинка №1' },
@@ -17,6 +16,15 @@ export const LAUNDRY_MACHINES = [
     { id: 5, name: 'Машинка №5' },
     { id: 6, name: 'Машинка №6' },
     { id: 7, name: 'Машинка №7' }
+];
+
+
+export const REPAIR_TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
+
+export const REPAIR_SPECIALISTS = [
+    { id: 'plumber', name: 'Сантехник' },
+    { id: 'electrician', name: 'Электрик' },
+    { id: 'carpenter', name: 'Плотник' }
 ];
 
 export const MAX_REPAIR_BOOKINGS = 2;
