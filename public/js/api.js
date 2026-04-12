@@ -112,18 +112,6 @@ export async function cancelBooking(bookingId) {
     return handleResponse(res);
 }
 
-export async function getLaundrySlots(machineId, date) {
-    const path = `/laundry/slots?machine_id=${machineId}&date=${date}`;
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getToken()}`,
-        },
-    });
-    return handleResponse(res);
-}
-
 export async function bookLaundry(machineId, date, slots) {
     const path = "/laundry/book";
     const res = await fetch(`${API_BASE}${path}`, {
