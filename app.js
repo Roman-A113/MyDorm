@@ -1,60 +1,72 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const db = require('./db');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const db = require("./db");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static("public"));
 
-const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_secret';
+const JWT_SECRET = process.env.JWT_SECRET || "replace_this_secret";
 
 function generateToken(user) {
-    return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+    return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
+        expiresIn: "8h",
+    });
 }
 
-app.post('/auth/register', async (req, res) => {
+app.post("/auth/register", async (req, res) => {
     const { name, email, password, role, room } = req.body;
     if (!name || !email || !password || !role)
-        return res.status(400).send('Некорректные данные');
+        return res.status(400).send("Некорректные данные");
 
-    const exists = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+    const exists = await db.query("SELECT id FROM users WHERE email = $1", [
+        email,
+    ]);
     if (exists.rows.length)
-        return res.status(409).send('Данный пользователь уже существует');
+        return res.status(409).send("Данный пользователь уже существует");
 
     const hash = await bcrypt.hash(password, 10);
     const result = await db.query(
-        'INSERT INTO users (name, email, password_hash, role, room) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, email, role',
-        [name, email, hash, role, room || null]
+        "INSERT INTO users (name, email, password_hash, role, room) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, email, role",
+        [name, email, hash, role, room || null],
     );
     const token = generateToken(result.rows[0]);
     res.json({ token, user: result.rows[0] });
 });
 
-app.post('/auth/login', async (req, res) => {
+app.post("/auth/login", async (req, res) => {
     const { email, password } = req.body;
-    const { rows } = await db.query(`SELECT id, name, email, role, password_hash FROM users WHERE email = '${email}'`);
+    const { rows } = await db.query(
+        `SELECT id, name, email, role, password_hash FROM users WHERE email = '${email}'`,
+    );
     const user = rows[0];
-    if (!user)
-        return res.status(401).send('Такого пользователя не существует');
+    if (!user) return res.status(401).send("Такого пользователя не существует");
 
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok)
-        return res.status(401).send('Неверный пароль');
+    if (!ok) return res.status(401).send("Неверный пароль");
 
     const token = generateToken(user);
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    res.json({
+        token,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        },
+    });
 });
-
 
 async function getUserById(id) {
     const { rows } = await db.query(
         `SELECT id, name, email, role, room 
          FROM users
-         WHERE id = ${id}`);
+         WHERE id = ${id}`,
+    );
 
     if (rows.length === 0) {
         throw new Error(`Пользователь c id ${id} не найден`);
@@ -62,52 +74,62 @@ async function getUserById(id) {
     return rows[0];
 }
 
-
 function authMiddleware(req, res, next) {
     const auth = req.headers.authorization;
-    if (!auth)
-        return res.status(401).send('Unauthorized');
-    const token = auth.split(' ')[1];
+    if (!auth) return res.status(401).send("Unauthorized");
+    const token = auth.split(" ")[1];
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
     } catch (e) {
-        return res.status(401).send('Invalid token');
+        return res.status(401).send("Invalid token");
     }
 }
 
-app.get('/user/me', authMiddleware, async (req, res) => {
+app.get("/user/me", authMiddleware, async (req, res) => {
     const user = await getUserById(req.user.id);
     res.json(user);
 });
 
-app.get('/announcements', authMiddleware, async (req, res) => {
-    const { rows } = await db.query('SELECT id, title, body, published_at FROM announcements ORDER BY published_at DESC');
+app.get("/announcements", authMiddleware, async (req, res) => {
+    const { rows } = await db.query(
+        "SELECT id, title, body, published_at FROM announcements ORDER BY published_at DESC",
+    );
     res.json(rows);
 });
 
-app.post('/announcements', authMiddleware, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Только админ' });
+app.post("/announcements", authMiddleware, async (req, res) => {
+    if (req.user.role !== "admin")
+        return res.status(403).json({ error: "Только админ" });
     const { title, body } = req.body;
-    if (!title || !body) return res.status(400).json({ error: 'Заполните поля' });
+    if (!title || !body)
+        return res.status(400).json({ error: "Заполните поля" });
 
-    const { rows } = await db.query('INSERT INTO announcements (title, body, author_id, published_at) VALUES ($1,$2,$3,NOW()) RETURNING *', [title, body, req.user.id]);
+    const { rows } = await db.query(
+        "INSERT INTO announcements (title, body, author_id, published_at) VALUES ($1,$2,$3,NOW()) RETURNING *",
+        [title, body, req.user.id],
+    );
     res.json(rows[0]);
 });
 
+const {
+    generateCalendarDays,
+    LAUNDRY_TIME_SLOTS,
+    LAUNDRY_MACHINES,
+    REPAIR_TIME_BLOCKS,
+    REPAIR_SPECIALISTS,
+} = require("./public/js/utils");
 
-const { generateCalendarDays, LAUNDRY_TIME_SLOTS, LAUNDRY_MACHINES, REPAIR_TIME_BLOCKS, REPAIR_SPECIALISTS } = require('./public/js/utils');
-
-app.get('/repair-calendar', authMiddleware, async (req, res) => {
+app.get("/repair-calendar", authMiddleware, async (req, res) => {
     const days = generateCalendarDays();
 
     const bookings = {};
-    REPAIR_SPECIALISTS.forEach(spec => {
+    REPAIR_SPECIALISTS.forEach((spec) => {
         bookings[spec.id] = {};
-        days.forEach(day => {
+        days.forEach((day) => {
             bookings[spec.id][day] = {};
-            REPAIR_TIME_BLOCKS.forEach(block => {
+            REPAIR_TIME_BLOCKS.forEach((block) => {
                 bookings[spec.id][day][block] = [];
             });
         });
@@ -123,7 +145,7 @@ app.get('/repair-calendar', authMiddleware, async (req, res) => {
     `;
     const rows = await db.query(query);
 
-    rows.rows.forEach(row => {
+    rows.rows.forEach((row) => {
         const { specialization, slot_date, time_block, slot_bookings } = row;
         bookings[specialization][slot_date][time_block] = slot_bookings;
     });
@@ -131,10 +153,12 @@ app.get('/repair-calendar', authMiddleware, async (req, res) => {
     res.json(bookings);
 });
 
-app.post('/repairs/book', authMiddleware, async (req, res) => {
-    const { slot_date, time_block, specialization, problem_description } = req.body;
+app.post("/repairs/book", authMiddleware, async (req, res) => {
+    const { slot_date, time_block, specialization, problem_description } =
+        req.body;
 
-    await db.query(`
+    await db.query(
+        `
             INSERT INTO repair_bookings (
                 slot_date,
                 time_block,
@@ -143,24 +167,34 @@ app.post('/repairs/book', authMiddleware, async (req, res) => {
                 problem_description,
                 status
             ) VALUES ($1, $2, $3, $4, $5, 'pending')
-        `, [slot_date, time_block, req.user.id, specialization, problem_description]);
+        `,
+        [
+            slot_date,
+            time_block,
+            req.user.id,
+            specialization,
+            problem_description,
+        ],
+    );
 
-    res.json({ status: 'ok', message: 'Заявка успешно отправлена' });
+    res.json({ status: "ok", message: "Заявка успешно отправлена" });
 });
 
-app.delete('/repairs/bookings/:id', authMiddleware, async (req, res) => {
+app.delete("/repairs/bookings/:id", authMiddleware, async (req, res) => {
     const bookingId = Number(req.params.id);
 
-    await db.query(`
+    await db.query(
+        `
             DELETE FROM repair_bookings 
             WHERE id = $1
-        `, [bookingId]);
+        `,
+        [bookingId],
+    );
 
-    res.json({ status: 'ok' });
+    res.json({ status: "ok" });
 });
 
-
-app.post('/laundry/book', authMiddleware, async (req, res) => {
+app.post("/laundry/book", authMiddleware, async (req, res) => {
     const { machine_id, date, slots } = req.body;
 
     const userId = req.user.id;
@@ -172,7 +206,11 @@ app.post('/laundry/book', authMiddleware, async (req, res) => {
                 WHERE machine_id = $1 AND booking_date = $2 AND time_slot = $3 
                 FOR UPDATE
             `;
-        const existing = await db.query(checkQuery, [machine_id, date, timeSlot]);
+        const existing = await db.query(checkQuery, [
+            machine_id,
+            date,
+            timeSlot,
+        ]);
 
         if (existing.rows.length > 0) {
             throw new Error(`Слот ${timeSlot} уже занят кем-то другим.`);
@@ -183,21 +221,24 @@ app.post('/laundry/book', authMiddleware, async (req, res) => {
                 VALUES ($1, $2, $3, $4)
                 RETURNING id, time_slot
             `;
-        const result = await db.query(insertQuery, [machine_id, date, timeSlot, userId]);
+        const result = await db.query(insertQuery, [
+            machine_id,
+            date,
+            timeSlot,
+            userId,
+        ]);
         insertedBookings.push(result.rows[0]);
     }
-    res.json({ status: 'ok', bookings: insertedBookings });
+    res.json({ status: "ok", bookings: insertedBookings });
 });
 
-
-app.delete('/laundry/cancel/:id', authMiddleware, async (req, res) => {
+app.delete("/laundry/cancel/:id", authMiddleware, async (req, res) => {
     const bookingId = req.params.id;
-    await db.query('DELETE FROM laundry_bookings WHERE id = $1', [bookingId]);
-    res.json({ status: 'ok', message: 'Бронь отменена' });
+    await db.query("DELETE FROM laundry_bookings WHERE id = $1", [bookingId]);
+    res.json({ status: "ok", message: "Бронь отменена" });
 });
 
-
-app.get('/laundry/all-data', authMiddleware, async (req, res) => {
+app.get("/laundry/all-data", authMiddleware, async (req, res) => {
     try {
         const query = `
             SELECT machine_id, 
@@ -212,32 +253,31 @@ app.get('/laundry/all-data', authMiddleware, async (req, res) => {
         const days = generateCalendarDays();
 
         const allBookings = {};
-        LAUNDRY_MACHINES.forEach(machine => {
+        LAUNDRY_MACHINES.forEach((machine) => {
             allBookings[machine.id] = {};
-            days.forEach(day => {
+            days.forEach((day) => {
                 allBookings[machine.id][day] = {};
-                LAUNDRY_TIME_SLOTS.forEach(slot => {
+                LAUNDRY_TIME_SLOTS.forEach((slot) => {
                     allBookings[machine.id][day][slot] = {};
                 });
             });
         });
 
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const { machine_id, date, time_slot, user_id, booking_id } = row;
 
             allBookings[machine_id][date][time_slot] = {
                 userId: user_id,
-                bookingId: booking_id
+                bookingId: booking_id,
             };
         });
 
         res.json(allBookings);
     } catch (err) {
-        console.error('Ошибка получения данных стиралки:', err);
-        res.status(500).json({ error: 'Ошибка сервера' });
+        console.error("Ошибка получения данных стиралки:", err);
+        res.status(500).json({ error: "Ошибка сервера" });
     }
 });
-
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

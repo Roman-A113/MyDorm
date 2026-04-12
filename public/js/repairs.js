@@ -1,46 +1,59 @@
-import { getRepairCalendar, bookRepair, cancelBooking } from './api.js';
-import { generateCalendarDays, renderNotification, renderCalendarGrid, setupCalendarClicks, DAY_STATUS, MAX_REPAIR_BOOKINGS, REPAIR_TIME_BLOCKS, REPAIR_SPECIALISTS } from './utils.js';
+import { getRepairCalendar, bookRepair, cancelBooking } from "./api.js";
+import {
+    generateCalendarDays,
+    renderNotification,
+    renderCalendarGrid,
+    setupCalendarClicks,
+    DAY_STATUS,
+    MAX_REPAIR_BOOKINGS,
+    REPAIR_TIME_BLOCKS,
+    REPAIR_SPECIALISTS,
+} from "./utils.js";
 
-const CALENDAR_CONTAINER_ID = 'calendar-content-repair';
-const PANEL_ID = 'panel-repair';
+const CALENDAR_CONTAINER_ID = "calendar-content-repair";
+const PANEL_ID = "panel-repair";
 
 function formatDisplayDate(dateStr) {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('ru-RU', {
-        weekday: 'short', day: 'numeric', month: 'short'
+    return date.toLocaleDateString("ru-RU", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
     });
 }
 
 function getSpecialistLabel(specialist) {
     return {
-        plumber: 'Сантехник',
-        electrician: 'Электрик',
-        carpenter: 'Плотник'
+        plumber: "Сантехник",
+        electrician: "Электрик",
+        carpenter: "Плотник",
     }[specialist];
 }
 
 function getStatusLabel(status) {
     return {
-        pending: '⏳ Ожидает',
-        accepted: '✅ Принято',
-        rejected: '❌ Отклонено',
-        completed: '🎉 Выполнено',
-        cancelled: '🚫 Отменено'
+        pending: "⏳ Ожидает",
+        accepted: "✅ Принято",
+        rejected: "❌ Отклонено",
+        completed: "🎉 Выполнено",
+        cancelled: "🚫 Отменено",
     }[status];
 }
 
 function getTimeLabel(block) {
     return {
-        '09-12': '🌅 Утро (09:00–12:00)',
-        '12-15': '☀️ День (12:00–15:00)',
-        '15-18': '🌤️ Вечер (15:00–18:00)',
-        '18-21': '🌙 Поздний вечер (18:00–21:00)'
+        "09-12": "🌅 Утро (09:00–12:00)",
+        "12-15": "☀️ День (12:00–15:00)",
+        "15-18": "🌤️ Вечер (15:00–18:00)",
+        "18-21": "🌙 Поздний вечер (18:00–21:00)",
     }[block];
 }
 
 function renderTimeSlot(day, time, slotBookings) {
     const freeSpots = MAX_REPAIR_BOOKINGS - slotBookings.length;
-    const myBooking = slotBookings.find(b => b.user_id === window.currentUser.id);
+    const myBooking = slotBookings.find(
+        (b) => b.user_id === window.currentUser.id,
+    );
 
     if (myBooking) {
         return `
@@ -50,9 +63,11 @@ function renderTimeSlot(day, time, slotBookings) {
                     <span class="status-badge status-${myBooking.status}">${getStatusLabel(myBooking.status)}</span>
                 </div>
                 <p class="problem-text">${myBooking.problem_description}</p>
-                ${myBooking.status === 'pending' ?
-                `<button class="btn btn-sm btn-cancel" data-booking-id="${myBooking.id}">Отменить запись</button>`
-                : ''}
+                ${
+                    myBooking.status === "pending"
+                        ? `<button class="btn btn-sm btn-cancel" data-booking-id="${myBooking.id}">Отменить запись</button>`
+                        : ""
+                }
             </div>
         `;
     }
@@ -82,9 +97,9 @@ function renderTimeSlot(day, time, slotBookings) {
 }
 
 function openBookingModal(date, block) {
-    const specialist = document.getElementById('specialist-select').value;
-    const modal = document.createElement('div');
-    modal.className = 'modal';
+    const specialist = document.getElementById("specialist-select").value;
+    const modal = document.createElement("div");
+    modal.className = "modal";
     modal.innerHTML = `
         <div class="modal-content">
             <h4>📝 Запись на ремонт: ${getSpecialistLabel(specialist)}</h4>
@@ -104,10 +119,12 @@ function openBookingModal(date, block) {
     document.body.appendChild(modal);
 
     const close = () => modal.remove();
-    modal.querySelector('.modal-close').onclick = close;
-    modal.onclick = (e) => { if (e.target === modal) close(); };
+    modal.querySelector(".modal-close").onclick = close;
+    modal.onclick = (e) => {
+        if (e.target === modal) close();
+    };
 
-    modal.querySelector('#bookForm').onsubmit = async (e) => {
+    modal.querySelector("#bookForm").onsubmit = async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         try {
@@ -115,15 +132,16 @@ function openBookingModal(date, block) {
                 slot_date: date,
                 time_block: block,
                 specialization: specialist,
-                problem_description: fd.get('problem_description')
+                problem_description: fd.get("problem_description"),
             });
-            renderNotification('✅ Заявка отправлена!', 'success');
+            renderNotification("✅ Заявка отправлена!", "success");
             close();
-            const currentSpecialist = document.getElementById('specialist-select').value;
+            const currentSpecialist =
+                document.getElementById("specialist-select").value;
             renderRepairCalendar(currentSpecialist);
         } catch (error) {
             console.log(error);
-            renderNotification('❌ ' + error.message);
+            renderNotification("❌ " + error.message);
         }
     };
 }
@@ -132,25 +150,26 @@ function initRepairSlotActions() {
     const panel = document.getElementById(PANEL_ID);
     if (!panel) return;
 
-    panel.querySelectorAll('.btn-primary').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+    panel.querySelectorAll(".btn-primary").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
             e.stopPropagation();
             openBookingModal(btn.dataset.date, btn.dataset.block);
         });
     });
 
-    panel.querySelectorAll('.btn-cancel').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
+    panel.querySelectorAll(".btn-cancel").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
             e.stopPropagation();
-            if (!confirm('Отменить запись?')) return;
+            if (!confirm("Отменить запись?")) return;
             try {
                 await cancelBooking(btn.dataset.bookingId);
-                renderNotification('Запись отменена', 'success');
+                renderNotification("Запись отменена", "success");
 
-                const specialist = document.getElementById('specialist-select').value;
+                const specialist =
+                    document.getElementById("specialist-select").value;
                 renderRepairCalendar(specialist);
             } catch (error) {
-                renderNotification('Ошибка: ' + error.message);
+                renderNotification("Ошибка: " + error.message);
             }
         });
     });
@@ -158,21 +177,20 @@ function initRepairSlotActions() {
 
 function renderRepairDayDetails(date, dayBookings) {
     const panel = document.getElementById(PANEL_ID);
-    if (!panel)
-        return;
+    if (!panel) return;
 
-    panel.classList.remove('hidden');
+    panel.classList.remove("hidden");
 
     const dateObj = new Date(date);
-    const formattedDate = dateObj.toLocaleDateString('ru-RU', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long'
+    const formattedDate = dateObj.toLocaleDateString("ru-RU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
     });
 
-    let slotsHtml = '';
+    let slotsHtml = "";
 
-    REPAIR_TIME_BLOCKS.forEach(time => {
+    REPAIR_TIME_BLOCKS.forEach((time) => {
         const slotBookings = dayBookings[time] || [];
         slotsHtml += renderTimeSlot(date, time, slotBookings);
     });
@@ -187,12 +205,12 @@ function renderRepairDayDetails(date, dayBookings) {
         </div>
     `;
 
-    panel.querySelector('.close-details').addEventListener('click', () => {
-        panel.classList.add('hidden');
+    panel.querySelector(".close-details").addEventListener("click", () => {
+        panel.classList.add("hidden");
         const calendarContainer = panel.parentElement;
         if (calendarContainer) {
-            calendarContainer.querySelectorAll('.calendar-day').forEach(c => {
-                c.classList.remove('active');
+            calendarContainer.querySelectorAll(".calendar-day").forEach((c) => {
+                c.classList.remove("active");
             });
         }
     });
@@ -201,27 +219,26 @@ function renderRepairDayDetails(date, dayBookings) {
 }
 
 function initSpecialistFilter() {
-    const select = document.getElementById('specialist-select');
+    const select = document.getElementById("specialist-select");
 
-    REPAIR_SPECIALISTS.forEach(specialist => {
-        const option = document.createElement('option');
+    REPAIR_SPECIALISTS.forEach((specialist) => {
+        const option = document.createElement("option");
         option.value = specialist.id;
         option.textContent = specialist.name;
         select.appendChild(option);
     });
 
-    select.addEventListener('change', (e) => {
+    select.addEventListener("change", (e) => {
         const specialistId = e.target.value;
         renderRepairCalendar(specialistId);
     });
 }
 
-
 function getRepairDayStatus(dateStr, specialistBookings) {
     const dayBookings = specialistBookings[dateStr] || {};
 
-    const hasUserBooking = REPAIR_TIME_BLOCKS.some(time =>
-        dayBookings[time]?.some(b => b.user_id === window.currentUser.id)
+    const hasUserBooking = REPAIR_TIME_BLOCKS.some((time) =>
+        dayBookings[time]?.some((b) => b.user_id === window.currentUser.id),
     );
 
     if (hasUserBooking) {
@@ -229,9 +246,9 @@ function getRepairDayStatus(dateStr, specialistBookings) {
     }
 
     let totalFree = 0;
-    REPAIR_TIME_BLOCKS.forEach(time => {
+    REPAIR_TIME_BLOCKS.forEach((time) => {
         const slots = dayBookings[time] || [];
-        totalFree += (MAX_REPAIR_BOOKINGS - slots.length);
+        totalFree += MAX_REPAIR_BOOKINGS - slots.length;
     });
 
     if (totalFree <= 0) {
@@ -253,7 +270,8 @@ export async function renderRepairCalendar(specialist) {
 
         const rawDays = generateCalendarDays();
 
-        const getStatusCallback = (dateStr) => getRepairDayStatus(dateStr, specialistBookings);
+        const getStatusCallback = (dateStr) =>
+            getRepairDayStatus(dateStr, specialistBookings);
 
         container.innerHTML = `
             ${renderCalendarGrid(rawDays, getStatusCallback)}
@@ -271,6 +289,6 @@ export async function renderRepairCalendar(specialist) {
 
 export async function renderShifts() {
     initSpecialistFilter();
-    const specialist = document.getElementById('specialist-select').value;
+    const specialist = document.getElementById("specialist-select").value;
     await renderRepairCalendar(specialist);
 }
