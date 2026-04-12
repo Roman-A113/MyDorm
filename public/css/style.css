@@ -1072,7 +1072,6 @@ html {
     font-size: 10px;
 }
 
-/* Панель деталей выбранного дня */
 .day-details-panel {
     background: white;
     border: 1px solid #ddd;
@@ -1080,7 +1079,6 @@ html {
     padding: 20px;
     margin-top: 15px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    animation: slideDown 0.3s ease-out;
 }
 
 .day-details-panel.hidden {

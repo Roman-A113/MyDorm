@@ -1,8 +1,5 @@
 import { getRepairCalendar, bookRepair, cancelBooking } from './api.js';
-import { generateCalendarDays, renderNotification, renderCalendarGrid, setupCalendarClicks, DAY_STATUS } from './utils.js';
-
-const TIME_BLOCKS = ['09-12', '12-15', '15-18', '18-21'];
-const MAX_BOOKINGS = 2;
+import { generateCalendarDays, renderNotification, renderCalendarGrid, setupCalendarClicks, DAY_STATUS, MAX_REPAIR_BOOKINGS, REPAIR_TIME_BLOCKS } from './utils.js';
 
 const CALENDAR_CONTAINER_ID = 'calendar-content-repair';
 const PANEL_ID = 'panel-repair';
@@ -42,7 +39,7 @@ function getTimeLabel(block) {
 }
 
 function renderTimeSlot(day, time, slotBookings) {
-    const freeSpots = MAX_BOOKINGS - slotBookings.length;
+    const freeSpots = MAX_REPAIR_BOOKINGS - slotBookings.length;
     const myBooking = slotBookings.find(b => b.user_id === window.currentUser.id);
 
     if (myBooking) {
@@ -175,7 +172,7 @@ function renderRepairDayDetails(date, dayBookings) {
 
     let slotsHtml = '';
 
-    TIME_BLOCKS.forEach(time => {
+    REPAIR_TIME_BLOCKS.forEach(time => {
         const slotBookings = dayBookings[time] || [];
         slotsHtml += renderTimeSlot(date, time, slotBookings);
     });
@@ -220,7 +217,7 @@ function initSpecialistFilter() {
 function getRepairDayStatus(dateStr, specialistBookings) {
     const dayBookings = specialistBookings[dateStr] || {};
 
-    const hasUserBooking = TIME_BLOCKS.some(time =>
+    const hasUserBooking = REPAIR_TIME_BLOCKS.some(time =>
         dayBookings[time]?.some(b => b.user_id === window.currentUser.id)
     );
 
@@ -229,9 +226,9 @@ function getRepairDayStatus(dateStr, specialistBookings) {
     }
 
     let totalFree = 0;
-    TIME_BLOCKS.forEach(time => {
+    REPAIR_TIME_BLOCKS.forEach(time => {
         const slots = dayBookings[time] || [];
-        totalFree += (MAX_BOOKINGS - slots.length);
+        totalFree += (MAX_REPAIR_BOOKINGS - slots.length);
     });
 
     if (totalFree <= 0) {
