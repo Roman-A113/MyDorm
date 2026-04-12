@@ -1,5 +1,5 @@
 import { getAllLaundryBookings, bookLaundry, cancelLaundry } from './api.js';
-import { generateCalendarDays, renderCalendarGrid, setupCalendarClicks } from './utils.js';
+import { generateCalendarDays, renderCalendarGrid, setupCalendarClicks, DAY_STATUS } from './utils.js';
 
 const CALENDAR_CONTAINER_ID = 'calendar-content-laundry';
 const SLOTS_CONTAINER_ID = 'laundry-slots-list';
@@ -16,6 +16,34 @@ const TIME_SLOTS = [
     "18:00-18:30", "18:30-19:00", "19:00-19:30", "19:30-20:00",
     "20:00-20:30", "20:30-21:00"
 ];
+
+const SLOTS_PER_MACHINE = TIME_SLOTS.length;
+
+function getLaundryDayStatus(machineId, dateStr, allLaundryBookings) {
+    const bookingsForDay = allLaundryBookings[machineId][dateStr];
+
+    let bookedCount = 0;
+    let hasMyBooking = false;
+
+    for (const slotTime in bookingsForDay) {
+        const bookingInfo = bookingsForDay[slotTime];
+        if (Object.keys(bookingInfo).length > 0) {
+            bookedCount++;
+            if (bookingInfo.userId === window.currentUser.id) {
+                hasMyBooking = true;
+            }
+        }
+    }
+    const freeSlots = SLOTS_PER_MACHINE - bookedCount;
+
+    if (hasMyBooking) {
+        return DAY_STATUS.MY_BOOKING;
+    }
+    if (freeSlots <= 0) {
+        return DAY_STATUS.FULL;
+    }
+    return DAY_STATUS.DEFAULT;
+}
 
 function toggleSlotSelection(btn, slot) {
     btn.classList.toggle('selected');
@@ -47,6 +75,7 @@ async function handleCancelBooking(selectedMachineId, selectedDate, bookingId, t
 
     await cancelLaundry(bookingId);
     allLaundryBookings = await getAllLaundryBookings();
+    renderLaundryCalendar(selectedMachineId);
     renderSlotsList(selectedMachineId, selectedDate);
 }
 
@@ -58,6 +87,7 @@ async function handleBookingSubmit(selectedMachineId, selectedDate) {
 
     allLaundryBookings = await getAllLaundryBookings();
     selectedSlots.clear();
+    renderLaundryCalendar(selectedMachineId);
     renderSlotsList(selectedMachineId, selectedDate);
 }
 
@@ -113,7 +143,7 @@ function renderSlotsList(selectedMachineId, dateStr) {
 
 function renderLaundryCalendar(selectedMachineId) {
     const container = document.getElementById(CALENDAR_CONTAINER_ID);
-    container.innerHTML = renderCalendarGrid(generateCalendarDays());
+    container.innerHTML = renderCalendarGrid(generateCalendarDays(), (dateStr) => getLaundryDayStatus(selectedMachineId, dateStr, allLaundryBookings));
     setupCalendarClicks(CALENDAR_CONTAINER_ID, (dateStr) => renderSlotsList(selectedMachineId, dateStr));
 }
 
