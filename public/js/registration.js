@@ -10,7 +10,7 @@ registerForm.addEventListener("submit", async (event) => {
         name: fd.get("name"),
         email: fd.get("email"),
         password: fd.get("password"),
-        role: fd.get("role"),
+        role: "student",
     };
 
     try {
