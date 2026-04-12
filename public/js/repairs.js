@@ -1,4 +1,9 @@
-import { getRepairCalendar, bookRepair, cancelBooking } from "./api.js";
+import {
+    getRepairCalendar,
+    bookRepair,
+    cancelBooking,
+    updateRepairStatus,
+} from "./api.js";
 import {
     generateCalendarDays,
     renderNotification,
@@ -47,6 +52,30 @@ function getTimeLabel(block) {
         "15-18": "🌤️ Вечер (15:00–18:00)",
         "18-21": "🌙 Поздний вечер (18:00–21:00)",
     }[block];
+}
+
+function getRepairDayStatus(dateStr, specialistBookings) {
+    const dayBookings = specialistBookings[dateStr] || {};
+
+    const hasUserBooking = REPAIR_TIME_BLOCKS.some((time) =>
+        dayBookings[time]?.some((b) => b.user_id === window.currentUser.id),
+    );
+
+    if (hasUserBooking) {
+        return DAY_STATUS.MY_BOOKING;
+    }
+
+    let totalFree = 0;
+    REPAIR_TIME_BLOCKS.forEach((time) => {
+        const slots = dayBookings[time] || [];
+        totalFree += MAX_REPAIR_BOOKINGS - slots.length;
+    });
+
+    if (totalFree <= 0) {
+        return DAY_STATUS.FULL;
+    }
+
+    return DAY_STATUS.DEFAULT;
 }
 
 function renderTimeSlot(day, time, slotBookings) {
@@ -138,7 +167,7 @@ function openBookingModal(date, block) {
             close();
             const currentSpecialist =
                 document.getElementById("specialist-select").value;
-            renderRepairCalendar(currentSpecialist);
+            renderStudentRepairCalendar(currentSpecialist);
         } catch (error) {
             console.log(error);
             renderNotification("❌ " + error.message);
@@ -146,9 +175,8 @@ function openBookingModal(date, block) {
     };
 }
 
-function initRepairSlotActions() {
+function initStudentRepairSlotActions() {
     const panel = document.getElementById(PANEL_ID);
-    if (!panel) return;
 
     panel.querySelectorAll(".btn-primary").forEach((btn) => {
         btn.addEventListener("click", (e) => {
@@ -161,21 +189,17 @@ function initRepairSlotActions() {
         btn.addEventListener("click", async (e) => {
             e.stopPropagation();
             if (!confirm("Отменить запись?")) return;
-            try {
-                await cancelBooking(btn.dataset.bookingId);
-                renderNotification("Запись отменена", "success");
+            await cancelBooking(btn.dataset.bookingId);
+            renderNotification("Запись отменена", "success");
 
-                const specialist =
-                    document.getElementById("specialist-select").value;
-                renderRepairCalendar(specialist);
-            } catch (error) {
-                renderNotification("Ошибка: " + error.message);
-            }
+            const specialist =
+                document.getElementById("specialist-select").value;
+            renderStudentRepairCalendar(specialist);
         });
     });
 }
 
-function renderRepairDayDetails(date, dayBookings) {
+function renderStudentDayDetails(date, dayBookings) {
     const panel = document.getElementById(PANEL_ID);
     if (!panel) return;
 
@@ -215,11 +239,182 @@ function renderRepairDayDetails(date, dayBookings) {
         }
     });
 
-    initRepairSlotActions();
+    initStudentRepairSlotActions();
+}
+
+export async function renderStudentRepairCalendar(specialist) {
+    const container = document.getElementById(CALENDAR_CONTAINER_ID);
+
+    const allBookings = await getRepairCalendar();
+    const specialistBookings = allBookings[specialist];
+
+    const rawDays = generateCalendarDays();
+
+    const getStatusCallback = (dateStr) =>
+        getRepairDayStatus(dateStr, specialistBookings);
+
+    container.innerHTML = `
+            ${renderCalendarGrid(rawDays, getStatusCallback)}
+            <div id="${PANEL_ID}" class="day-details-panel hidden"></div>
+        `;
+
+    setupCalendarClicks(CALENDAR_CONTAINER_ID, (dateStr) => {
+        renderStudentDayDetails(dateStr, specialistBookings[dateStr]);
+    });
+}
+
+async function renderWorkerRepairCalendar(specialist) {
+    const container = document.getElementById(CALENDAR_CONTAINER_ID);
+    const allBookings = await getRepairCalendar();
+    const specialistBookings = allBookings[specialist];
+
+    const getStatusCallback = (dateStr) => {
+        const dayData = specialistBookings[dateStr] || {};
+        let hasPending = false;
+        Object.values(dayData).forEach((slots) => {
+            if (slots.some((b) => b.status === "pending")) hasPending = true;
+        });
+        return hasPending ? DAY_STATUS.MY_BOOKING : DAY_STATUS.DEFAULT;
+    };
+
+    container.innerHTML = `
+                ${renderCalendarGrid(generateCalendarDays(), getStatusCallback)}
+                <div id="${PANEL_ID}" class="day-details-panel hidden"></div>`;
+
+    setupCalendarClicks(CALENDAR_CONTAINER_ID, (dateStr) => {
+        renderWorkerDayDetails(dateStr, specialistBookings[dateStr]);
+    });
+}
+
+function isWorker(user) {
+    return user && ["plumber", "electrician", "carpenter"].includes(user.role);
+}
+
+function renderRequestSlot(req) {
+    return `<div class="request-card status-${req.status}"><div class="req-header">
+                <span class="req-time"><strong>${getTimeLabel(req.time_block)}</strong></span>
+                <span class="req-status">${getStatusLabel(req.status)}</span>
+                </div>
+                    <div class="req-body">
+                        <p><strong>Студент ID:</strong> ${req.user_id}</p>
+                        <p class="problem-text">"${req.problem_description}"</p>
+                    </div>
+                    <div class="req-actions">
+                        ${renderWorkerActionButtons(req)}
+                    </div>
+                </div>`;
+}
+
+function renderWorkerDayDetails(date, dayBookings) {
+    const panel = document.getElementById(PANEL_ID);
+
+    panel.classList.remove("hidden");
+
+    const dateObj = new Date(date);
+    const formattedDate = dateObj.toLocaleDateString("ru-RU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+    });
+
+    let allRequests = [];
+    REPAIR_TIME_BLOCKS.forEach((time) => {
+        const bookings = dayBookings[time] || [];
+        bookings.forEach((b) => {
+            allRequests.push({ ...b, time_block: time });
+        });
+    });
+
+    allRequests.sort((a, b) => {
+        if (a.status === "pending" && b.status !== "pending") return -1;
+        if (a.status !== "pending" && b.status === "pending") return 1;
+        return 0;
+    });
+
+    let contentHtml = "";
+
+    if (allRequests.length === 0) {
+        contentHtml = `<div class="empty-state" style="padding: 20px; text-align: center; color: #777;">На ${formattedDate} заявок нет 🎉</div>`;
+    } else {
+        contentHtml = `<div class="worker-requests-list">`;
+        allRequests.forEach((req) => {
+            contentHtml += renderRequestSlot(req);
+        });
+        contentHtml += `</div>`;
+    }
+
+    panel.innerHTML = `
+        <div class="details-header">
+            <h3>📅 ${formattedDate}</h3>
+            <button class="btn btn-sm btn-text close-details" aria-label="Закрыть">✕</button>
+        </div>
+        ${contentHtml}
+    `;
+
+    panel.querySelector(".close-details").addEventListener("click", () => {
+        panel.classList.add("hidden");
+        const calendarContainer = panel.parentElement;
+        if (calendarContainer) {
+            calendarContainer.querySelectorAll(".calendar-day").forEach((c) => {
+                c.classList.remove("active");
+            });
+        }
+    });
+    initWorkerActions();
+}
+
+function initWorkerActions() {
+    const panel = document.getElementById(PANEL_ID);
+
+    panel.querySelectorAll(".req-actions button").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            const newStatus = btn.dataset.status;
+
+            await updateRepairStatus(id, newStatus);
+            renderNotification("Статус обновлен", "success");
+
+            await renderShifts();
+        });
+    });
+}
+
+function renderWorkerActionButtons(req) {
+    if (req.status === "pending") {
+        return `
+            <button class="btn btn-sm btn-accept" data-id="${req.id}" data-status="accepted">Принять</button>
+            <button class="btn btn-sm btn-reject" data-id="${req.id}" data-status="rejected">Отклонить</button>
+        `;
+    }
+    if (req.status === "accepted") {
+        return `
+            <button class="btn btn-sm btn-complete" data-id="${req.id}" data-status="completed">Выполнено</button>
+            <button class="btn btn-sm btn-reset" data-id="${req.id}" data-status="pending">Вернуть</button>
+        `;
+    }
+    if (
+        req.status === "completed" ||
+        req.status === "rejected" ||
+        req.status === "cancelled"
+    ) {
+        return `<button class="btn btn-sm btn-reset" data-id="${req.id}" data-status="pending">Вернуть в ожидание</button>`;
+    }
+    return "";
 }
 
 function initSpecialistFilter() {
-    const select = document.getElementById("specialist-select");
+    const container = document.getElementById("shifts");
+    const filterDiv = document.createElement("div");
+    filterDiv.className = "filter";
+
+    const label = document.createElement("label");
+    label.htmlFor = "specialist-select";
+    label.textContent = "🔧 Специалист:";
+
+    const select = document.createElement("select");
+    select.id = "specialist-select";
+    select.className = "form-select";
 
     REPAIR_SPECIALISTS.forEach((specialist) => {
         const option = document.createElement("option");
@@ -230,65 +425,21 @@ function initSpecialistFilter() {
 
     select.addEventListener("change", (e) => {
         const specialistId = e.target.value;
-        renderRepairCalendar(specialistId);
-    });
-}
-
-function getRepairDayStatus(dateStr, specialistBookings) {
-    const dayBookings = specialistBookings[dateStr] || {};
-
-    const hasUserBooking = REPAIR_TIME_BLOCKS.some((time) =>
-        dayBookings[time]?.some((b) => b.user_id === window.currentUser.id),
-    );
-
-    if (hasUserBooking) {
-        return DAY_STATUS.MY_BOOKING;
-    }
-
-    let totalFree = 0;
-    REPAIR_TIME_BLOCKS.forEach((time) => {
-        const slots = dayBookings[time] || [];
-        totalFree += MAX_REPAIR_BOOKINGS - slots.length;
+        renderStudentRepairCalendar(specialistId);
     });
 
-    if (totalFree <= 0) {
-        return DAY_STATUS.FULL;
-    }
-
-    return DAY_STATUS.DEFAULT;
-}
-
-export async function renderRepairCalendar(specialist) {
-    const container = document.getElementById(CALENDAR_CONTAINER_ID);
-    if (!container) return;
-
-    container.innerHTML = '<div class="loading">Загрузка календаря...</div>';
-
-    try {
-        const allBookings = await getRepairCalendar();
-        const specialistBookings = allBookings[specialist];
-
-        const rawDays = generateCalendarDays();
-
-        const getStatusCallback = (dateStr) =>
-            getRepairDayStatus(dateStr, specialistBookings);
-
-        container.innerHTML = `
-            ${renderCalendarGrid(rawDays, getStatusCallback)}
-            <div id="${PANEL_ID}" class="day-details-panel hidden"></div>
-        `;
-
-        setupCalendarClicks(CALENDAR_CONTAINER_ID, (dateStr) => {
-            renderRepairDayDetails(dateStr, specialistBookings[dateStr]);
-        });
-    } catch (error) {
-        console.error(error);
-        container.innerHTML = '<div class="error">Ошибка загрузки</div>';
-    }
+    filterDiv.appendChild(label);
+    filterDiv.appendChild(select);
+    container.prepend(filterDiv);
 }
 
 export async function renderShifts() {
-    initSpecialistFilter();
-    const specialist = document.getElementById("specialist-select").value;
-    await renderRepairCalendar(specialist);
+    if (isWorker(window.currentUser)) {
+        const specialist = window.currentUser.role;
+        await renderWorkerRepairCalendar(specialist);
+    } else {
+        initSpecialistFilter();
+        const specialist = document.getElementById("specialist-select").value;
+        await renderStudentRepairCalendar(specialist);
+    }
 }

@@ -152,3 +152,16 @@ export async function getAllLaundryBookings() {
     });
     return handleResponse(res);
 }
+
+export async function updateRepairStatus(bookingId, newStatus) {
+    const path = `/repairs/status/${bookingId}`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+    });
+    return handleResponse(res);
+}

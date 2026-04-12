@@ -1219,14 +1219,12 @@ html {
     color: #c62828;
 }
 
-/* Индикатор статуса внутри слота (справа) */
 .slot-status {
     font-size: 12px;
     padding: 2px 6px;
     border-radius: 4px;
 }
 
-/* Кнопка бронирования внизу списка */
 #book-btn {
     margin-top: 15px;
     width: 100%;
@@ -1249,7 +1247,77 @@ html {
     cursor: not-allowed;
 }
 
-/* Скрытая панель деталей (если используется) */
 .hidden {
     display: none;
+}
+
+/* Карточка заявки для мастера */
+.master-requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.request-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+    border-left: 4px solid #ccc;
+}
+
+.request-card.status-pending {
+    border-left-color: #ff9800;
+} /* Оранжевый */
+.request-card.status-accepted {
+    border-left-color: #2196f3;
+} /* Синий */
+.request-card.status-completed {
+    border-left-color: #4caf50;
+} /* Зеленый */
+.request-card.status-rejected {
+    border-left-color: #f44336;
+} /* Красный */
+
+.req-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+.req-body {
+    margin-bottom: 10px;
+}
+
+.problem-text {
+    font-style: italic;
+    color: #555;
+    background: #f9f9f9;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.req-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-accept {
+    background-color: #2196f3;
+    color: white;
+}
+.btn-reject {
+    background-color: #f44336;
+    color: white;
+}
+.btn-complete {
+    background-color: #4caf50;
+    color: white;
+}
+.btn-reset {
+    background-color: #9e9e9e;
+    color: white;
 }

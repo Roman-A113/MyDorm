@@ -260,6 +260,32 @@ app.get("/laundry/all-data", authMiddleware, async (req, res) => {
     res.json(allBookings);
 });
 
+app.patch("/repairs/status/:id", authMiddleware, async (req, res) => {
+    const bookingId = req.params.id;
+    const { status } = req.body;
+
+    const bookingRes = await db.query(
+        "SELECT specialization FROM repair_bookings WHERE id = $1",
+        [bookingId],
+    );
+
+    if (bookingRes.rows.length === 0) {
+        return res.status(404).json("Заявка не найдена");
+    }
+
+    const validStatuses = ["pending", "accepted", "rejected", "completed"];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json("Неверный статус");
+    }
+
+    await db.query("UPDATE repair_bookings SET status = $1 WHERE id = $2", [
+        status,
+        bookingId,
+    ]);
+
+    res.json(null);
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
