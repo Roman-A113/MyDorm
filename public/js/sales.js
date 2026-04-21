@@ -24,15 +24,7 @@ function initEventListeners(panel) {
     productForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const fd = new FormData(productForm);
-        const payload = {
-            title: fd.get("title"),
-            description: fd.get("description"),
-            price: fd.get("price"),
-            stock: fd.get("stock"),
-            seller_contact: fd.get("seller_contact"),
-        };
-
-        await addProduct(payload);
+        await addProduct(fd);
         renderNotification("Товар опубликован!", "success");
         productForm.reset();
         formPanel?.classList.add("hidden");

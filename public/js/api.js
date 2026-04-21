@@ -80,11 +80,11 @@ export async function addProduct(payload) {
     const res = await fetch(`${API_BASE}${path}`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify(payload),
+        body: payload,
     });
+
     return handleResponse(res);
 }
 
