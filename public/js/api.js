@@ -75,18 +75,18 @@ export async function getProducts() {
     return handleResponse(res);
 }
 
-export async function addProduct(formData) {
+export async function addProduct(payload) {
     const path = "/products/add";
     const res = await fetch(`${API_BASE}${path}`, {
         method: "POST",
         headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${getToken()}`,
         },
-        body: formData,
+        body: JSON.stringify(payload),
     });
     return handleResponse(res);
 }
-
 
 export async function bookProduct(productId) {
     const path = "/products/book";

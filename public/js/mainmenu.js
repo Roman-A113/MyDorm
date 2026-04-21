@@ -3,7 +3,7 @@ import { renderLaundry } from "./laundry.js";
 import { renderShifts } from "./repairs.js";
 import { renderNotification } from "./utils.js";
 import { getCurrentUser } from "./api.js";
-import { renderSaleCard } from "./sales.js";
+import { renderSales } from "./sales.js";
 
 function initLogout() {
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -38,7 +38,7 @@ async function loadMainMenu() {
         await renderAnnouncements();
         await renderLaundry();
         await renderShifts();
-        await renderSaleCard();
+        await renderSales();
     } catch (error) {
         console.log(error);
         renderNotification("Ошибка загрузки дашборда: " + error.message);

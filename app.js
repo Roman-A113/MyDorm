@@ -67,7 +67,7 @@ async function getUserById(id) {
         `SELECT id, name, email, role, room 
          FROM users
          WHERE id = $1`,
-        [id]
+        [id],
     );
 
     if (rows.length === 0) {
@@ -305,19 +305,15 @@ app.get("/products", authMiddleware, async (req, res) => {
 app.post("/products/add", authMiddleware, async (req, res) => {
     const { title, description, price, stock, seller_contact } = req.body;
 
-    if (!title || !price || !stock || !seller_contact) {
-        return res.status(400).json({ error: "Заполните название, цену, остаток и контакты" });
-    }
-
     const query = `
             INSERT INTO sales (
-                title, description, price, stock, image_path, 
+                title, description, price, stock, image_url, 
                 seller_contact, seller_id, status
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, 'active')
-            RETURNING id, title, description, price, stock, image_path AS image, seller_contact, status;
+            RETURNING id, title, description, price, stock, image_url AS image, seller_contact, status;
         `;
-    const imagePath = null; // Пока без загрузки файлов
+    const imagePath = null;
     const values = [
         title,
         description || null,
@@ -325,7 +321,7 @@ app.post("/products/add", authMiddleware, async (req, res) => {
         parseInt(stock, 10),
         imagePath,
         seller_contact,
-        req.user.id
+        req.user.id,
     ];
 
     const { rows } = await db.query(query, values);
@@ -335,25 +331,32 @@ app.post("/products/add", authMiddleware, async (req, res) => {
 app.post("/products/book", authMiddleware, async (req, res) => {
     try {
         const { product_id } = req.body;
-        const { rows: [product] } = await db.query(
-            "SELECT id, stock, status FROM sales WHERE id = $1", 
-            [product_id]
+        const {
+            rows: [product],
+        } = await db.query(
+            "SELECT id, stock, status FROM sales WHERE id = $1",
+            [product_id],
         );
-        
+
         if (!product) {
             return res.status(404).json({ error: "Товар не найден" });
         }
-        if (product.stock <= 0 || product.status !== 'active') {
+        if (product.stock <= 0 || product.status !== "active") {
             return res.status(409).json({ error: "Товар недоступен" });
         }
 
-        const { rows: [updated] } = await db.query(`
+        const {
+            rows: [updated],
+        } = await db.query(
+            `
             UPDATE sales 
             SET stock = stock - 1,
                 status = CASE WHEN stock - 1 = 0 THEN 'sold' ELSE status END
             WHERE id = $1 AND stock > 0
             RETURNING id, stock, status;
-        `, [product_id]);
+        `,
+            [product_id],
+        );
 
         res.json({ success: true, remaining: updated.stock });
     } catch (err) {
@@ -362,10 +365,7 @@ app.post("/products/book", authMiddleware, async (req, res) => {
     }
 });
 
-// main
-
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
 });
-

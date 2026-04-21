@@ -1,143 +1,117 @@
-import {getProducts, addProduct, bookProduct} from "./api.js";
-import {ADD_PRODUCT_FORM, renderNotification} from "./utils.js";
+import { getProducts, addProduct, bookProduct } from "./api.js";
+import { renderNotification } from "./utils.js";
 
-export async function renderSaleCard() {
-    const panel = document.querySelector(".sales-container");
-    if (!panel) return;
-
-    const products = await getProducts();
-
-    let html = `
-        <div class="sales-header">
-            <h3>Продаётся</h3>
-            ${window.currentUser?.role === "student" 
-                ? `<button class="toggle-form-btn" id="toggleAddProduct">+ Добавить товар</button>` 
-                : ''}
-        </div>
-        
-        <div class="sales-grid" id="products-grid">
-            ${products.map(p => `
+function renderSaleCard(p) {
+    return `
                 <article class="sales-card" data-id="${p.id}">
                     <div class="sales-card-body">
-                        <h3 class="sales-card-title">${escapeHtml(p.title || "Товар")}</h3>
-                        <img class="sales-card-media" alt="${escapeHtml(p.title)}" src="${p.image || 'pupupu.png'}">
-                        <p class="sales-card-description">${escapeHtml(p.description)}</p>
-                        <p class="sales-price">${p.price ?? 0} ₽</p>
-                        <p class="sales-stock">${p.stock ?? 1} шт</p>
-                        <p class="sales-seller-contact">${escapeHtml(p.seller_contact ?? "Продавец неизвестен")}</p>
+                        <h3 class="sales-card-title">${p.title}</h3>
+                        <img class="sales-card-media" alt="${p.title}" src="${p.image || "pupupu.png"}">
+                        <p class="sales-card-description">${p.description}</p>
+                        <p class="sales-price">${p.price} ₽</p>
+                        <p class="sales-stock">${p.stock} шт</p>
+                        <p class="sales-seller-contact">${p.seller_contact}</p>
                         <button class="sales-btn" data-action="book" data-id="${p.id}">Забронировать</button>
                     </div>
                 </article>
-            `).join('')}
+            `;
+}
+
+export async function renderSales() {
+    const panel = document.querySelector(".sales-container");
+
+    document.getElementById("products-grid")?.remove();
+
+    const products = await getProducts();
+
+    panel.innerHTML += `
+        <div id="products-grid" class="sales-grid">
+            ${products.map((p) => renderSaleCard(p)).join("")}
         </div>
     `;
 
-    if (window.currentUser?.role === "student") {
-        html += `
-            <div class="add-product-panel hidden" id="addProductPanel">
-                <form class="product-form" id="product-form" enctype="multipart/form-data">
-                    <div class="form-header">
-                        <h4>Новый товар</h4>
-                        <button type="button" class="close-form" id="closeAddProduct">&times;</button>
-                    </div>
-                    
-                    <label class="form-label">
-                        <span>Название *</span>
-                        <input type="text" name="title" required placeholder="Например: Джинсы">
-                    </label>
-                    
-                    <label class="form-label">
-                        <span>Фото</span>
-                        <input type="file" name="image" accept="image/*">
-                    </label>
-                    
-                    <label class="form-label">
-                        <span>Описание</span>
-                        <textarea name="description" rows="3" placeholder="Состояние, размер..."></textarea>
-                    </label>
-                    
-                    <label class="form-label">
-                        <span>Цена (₽) *</span>
-                        <input type="number" name="price" min="0" step="1" required>
-                    </label>
-                    
-                    <label class="form-label">
-                        <span>Количество *</span>
-                        <input type="number" name="stock" min="0" step="1" required>
-                    </label>
-                    
-                    <label class="form-label">
-                        <span>Контакты *</span>
-                        <input type="text" name="seller_contact" required placeholder="@telegram или телефон">
-                    </label>
-                    
-                    <button type="submit" class="form-btn">Опубликовать</button>
-                </form>
-            </div>
-        `;
-    }
-
-    panel.innerHTML = html;
-
-    const toggleBtn = document.getElementById("toggleAddProduct");
-    const closeBtn = document.getElementById("closeAddProduct");
     const formPanel = document.getElementById("addProductPanel");
-    
-    if (toggleBtn && formPanel) {
-        toggleBtn.addEventListener("click", () => {
-            formPanel.classList.toggle("hidden");
-            toggleBtn.textContent = formPanel.classList.contains("hidden") 
-                ? "Добавить товар" 
-                : "Скрыть форму";
-        });
-    }
-    if (closeBtn && formPanel) {
-        closeBtn.addEventListener("click", () => {
-            formPanel.classList.add("hidden");
-            if (toggleBtn) toggleBtn.textContent = "+ Добавить товар";
-        });
-    }
+    const toggleBtn = document.getElementById("toggleAddProduct");
+    toggleBtn.addEventListener("click", () => {
+        formPanel.classList.toggle("hidden");
+        toggleBtn.textContent = formPanel.classList.contains("hidden")
+            ? "+ Добавить товар"
+            : "Скрыть форму";
+    });
 
     const grid = document.getElementById("products-grid");
-    if (grid) {
-        grid.addEventListener("click", async (e) => {
-            const btn = e.target.closest("[data-action='book']");
-            if (!btn) return;
-            
-            const productId = btn.dataset.id;
-            try {
-                await bookProduct(productId);
-                renderNotification("Товар забронирован!", "success");
-                renderSaleCard();
-            } catch (err) {
-                renderNotification("Ошибка: " + err.message, "error");
-            }
-        });
-    }
+    grid.addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-action='book']");
+        if (!btn) return;
 
-    const form = document.getElementsByClassName("product-form");
-    if (form) {
-        document.getElementsByClassName("form-btn")[0].addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const fd = new FormData(form);
-            
-            try {
-                await addProduct(fd);
-                renderNotification("Товар опубликован!", "success");
-                form.reset();
-                formPanel?.classList.add("hidden");
-                if (toggleBtn) toggleBtn.textContent = "+ Добавить товар";
-                renderSaleCard();
-            } catch (err) {
-                renderNotification("Ошибка: " + err.message, "error");
-            }
-        });
-    }
-}
+        const productId = btn.dataset.id;
+        await bookProduct(productId);
+        renderNotification("Товар забронирован!", "success");
+        renderSales();
+    });
 
-function escapeHtml(text) {
-    if (!text) return 'Описание отсутствует';
-    return text.replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    })[m]);
+    const productForm = document.getElementById("product-form");
+    productForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const fd = new FormData(productForm);
+        const payload = {
+            title: fd.get("title"),
+            description: fd.get("description"),
+            price: fd.get("price"),
+            stock: fd.get("stock"),
+            seller_contact: fd.get("seller_contact"),
+        };
+
+        await addProduct(payload);
+        renderNotification("Товар опубликован!", "success");
+        productForm.reset();
+        formPanel?.classList.add("hidden");
+        if (toggleBtn) toggleBtn.textContent = "+ Добавить товар";
+        renderSales();
+    });
+
+    const phoneInput = document.getElementById("seller_contact");
+    phoneInput.addEventListener("input", function (e) {
+        let x = e.target.value.replace(/\D/g, "");
+
+        if (!x) {
+            e.target.value = "";
+            return;
+        }
+
+        if (["7", "8", "9"].indexOf(x[0]) > -1) {
+            if (x[0] === "9") x = "7" + x;
+            let firstSymbols = "+7";
+            if (x[0] === "8") firstSymbols = "8";
+
+            let formattedValue = firstSymbols + " ";
+
+            if (x.length > 1) {
+                formattedValue += "(" + x.substring(1, 4);
+            }
+            if (x.length >= 5) {
+                formattedValue += ") " + x.substring(4, 7);
+            }
+            if (x.length >= 8) {
+                formattedValue += "-" + x.substring(7, 9);
+            }
+            if (x.length >= 10) {
+                formattedValue += "-" + x.substring(9, 11);
+            }
+
+            e.target.value = formattedValue;
+        } else {
+            e.target.value = "+" + x.substring(0, 15);
+        }
+    });
+
+    phoneInput.addEventListener("keydown", function (e) {
+        if (e.key === "Backspace") {
+            const val = e.target.value;
+            if (val === "+7 " || val === "+7" || val === "8 " || val === "8") {
+                e.target.value = "";
+                e.preventDefault();
+            }
+        }
+    });
 }
