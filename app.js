@@ -41,7 +41,8 @@ app.post("/auth/register", async (req, res) => {
 app.post("/auth/login", async (req, res) => {
     const { email, password } = req.body;
     const { rows } = await db.query(
-        `SELECT id, name, email, role, password_hash FROM users WHERE email = '${email}'`,
+        `SELECT id, name, email, role, password_hash FROM users WHERE email = $1`,
+    [email],
     );
     const user = rows[0];
     if (!user) return res.status(401).send("Такого пользователя не существует");
@@ -238,6 +239,7 @@ app.get("/laundry/all-data", authMiddleware, async (req, res) => {
     const days = generateCalendarDays();
 
     const allBookings = {};
+    
     LAUNDRY_MACHINES.forEach((machine) => {
         allBookings[machine.id] = {};
         days.forEach((day) => {
@@ -286,7 +288,12 @@ app.patch("/repairs/status/:id", authMiddleware, async (req, res) => {
     res.json(null);
 });
 
+//sales
+
+// main
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
 });
+

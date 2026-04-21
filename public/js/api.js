@@ -63,6 +63,44 @@ export async function getAnnouncements() {
     return handleResponse(res);
 }
 
+export async function getProducts() {
+    const path = "/products";
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+    });
+
+    return handleResponse(res);
+}
+
+export async function addProduct(formData) {
+    const path = "/products/add";
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+        body: formData,
+    });
+    return handleResponse(res);
+}
+
+
+export async function bookProduct(productId) {
+    const path = "/products/book";
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ product_id: productId }),
+    });
+    return handleResponse(res);
+}
+
 export async function createAnnouncement(payload) {
     const path = "/announcements";
     const res = await fetch(`${API_BASE}${path}`, {
