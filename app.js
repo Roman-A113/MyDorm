@@ -42,7 +42,7 @@ app.post("/auth/login", async (req, res) => {
     const { email, password } = req.body;
     const { rows } = await db.query(
         `SELECT id, name, email, role, password_hash FROM users WHERE email = $1`,
-    [email],
+        [email],
     );
     const user = rows[0];
     if (!user) return res.status(401).send("Такого пользователя не существует");
@@ -66,10 +66,10 @@ async function getUserById(id) {
     const { rows } = await db.query(
         `SELECT id, name, email, role, room 
          FROM users
-         WHERE id = $1`,  
-        [id]             
+         WHERE id = $1`,
+        [id]
     );
-    
+
     if (rows.length === 0) {
         throw new Error(`Пользователь c id ${id} не найден`);
     }
@@ -240,7 +240,7 @@ app.get("/laundry/all-data", authMiddleware, async (req, res) => {
     const days = generateCalendarDays();
 
     const allBookings = {};
-    
+
     LAUNDRY_MACHINES.forEach((machine) => {
         allBookings[machine.id] = {};
         days.forEach((day) => {
@@ -304,9 +304,9 @@ app.get("/products", authMiddleware, async (req, res) => {
 
 app.post("/products/add", authMiddleware, async (req, res) => {
     const { title, description, price, stock, seller_contact } = req.body;
-    
+
     if (!title || !price || !stock || !seller_contact) {
-        return res.status(400).json({ error: "Заполните название, цену, остаток и контакты"});
+        return res.status(400).json({ error: "Заполните название, цену, остаток и контакты" });
     }
 
     const query = `
@@ -317,18 +317,49 @@ app.post("/products/add", authMiddleware, async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6, $7, 'active')
             RETURNING id, title, description, price, stock, image_path AS image, seller_contact, status;
         `;
-        const values = [
-            title,
-            description || null,
-            parseFloat(price),
-            parseInt(stock, 10),
-            imagePath,
-            seller_contact,
-            req.user.id
-        ];
+    const imagePath = null; // Пока без загрузки файлов
+    const values = [
+        title,
+        description || null,
+        parseFloat(price),
+        parseInt(stock, 10),
+        imagePath,
+        seller_contact,
+        req.user.id
+    ];
 
-        const { rows } = await db.query(query, values);
-        res.status(201).json(rows[0]);
+    const { rows } = await db.query(query, values);
+    res.status(201).json(rows[0]);
+});
+
+app.post("/products/book", authMiddleware, async (req, res) => {
+    try {
+        const { product_id } = req.body;
+        const { rows: [product] } = await db.query(
+            "SELECT id, stock, status FROM sales WHERE id = $1", 
+            [product_id]
+        );
+        
+        if (!product) {
+            return res.status(404).json({ error: "Товар не найден" });
+        }
+        if (product.stock <= 0 || product.status !== 'active') {
+            return res.status(409).json({ error: "Товар недоступен" });
+        }
+
+        const { rows: [updated] } = await db.query(`
+            UPDATE sales 
+            SET stock = stock - 1,
+                status = CASE WHEN stock - 1 = 0 THEN 'sold' ELSE status END
+            WHERE id = $1 AND stock > 0
+            RETURNING id, stock, status;
+        `, [product_id]);
+
+        res.json({ success: true, remaining: updated.stock });
+    } catch (err) {
+        console.error("Ошибка бронирования:", err);
+        res.status(500).json({ error: "Ошибка сервера" });
+    }
 });
 
 // main
