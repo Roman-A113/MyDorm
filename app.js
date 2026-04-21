@@ -66,9 +66,10 @@ async function getUserById(id) {
     const { rows } = await db.query(
         `SELECT id, name, email, role, room 
          FROM users
-         WHERE id = ${id}`,
+         WHERE id = $1`,  
+        [id]             
     );
-
+    
     if (rows.length === 0) {
         throw new Error(`Пользователь c id ${id} не найден`);
     }
@@ -289,6 +290,46 @@ app.patch("/repairs/status/:id", authMiddleware, async (req, res) => {
 });
 
 //sales
+
+app.get("/products", authMiddleware, async (req, res) => {
+    const { rows } = await db.query(`
+        SELECT id, title, description, price, stock, 
+               image_url AS image, seller_contact, status
+        FROM sales
+        WHERE status = 'active'
+        ORDER BY created_at DESC
+    `);
+    res.json(rows);
+});
+
+app.post("/products/add", authMiddleware, async (req, res) => {
+    const { title, description, price, stock, seller_contact } = req.body;
+    
+    if (!title || !price || !stock || !seller_contact) {
+        return res.status(400).json({ error: "Заполните название, цену, остаток и контакты"});
+    }
+
+    const query = `
+            INSERT INTO sales (
+                title, description, price, stock, image_path, 
+                seller_contact, seller_id, status
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'active')
+            RETURNING id, title, description, price, stock, image_path AS image, seller_contact, status;
+        `;
+        const values = [
+            title,
+            description || null,
+            parseFloat(price),
+            parseInt(stock, 10),
+            imagePath,
+            seller_contact,
+            req.user.id
+        ];
+
+        const { rows } = await db.query(query, values);
+        res.status(201).json(rows[0]);
+});
 
 // main
 

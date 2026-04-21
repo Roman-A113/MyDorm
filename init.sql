@@ -416,3 +416,24 @@ ALTER TABLE ONLY public.repair_bookings
 
 \unrestrict 8pmn5AB5RypeuBLJMwxAecbxynKUZMvr8nbmLUxWiO619hszSi1lh2dDbhofYWv
 
+
+-- SALES --
+CREATE TABLE sales (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+    stock INTEGER NOT NULL DEFAULT 1 CHECK (stock >= 0),
+    image_url VARCHAR(500),
+    seller_contact VARCHAR(255), -- Telegram, телефон, email
+    seller_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'reserved', 'sold', 'archived')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Индексы для быстрых выборок
+CREATE INDEX idx_sales_seller ON sales(seller_id);
+CREATE INDEX idx_sales_status ON sales(status);
+CREATE INDEX idx_sales_date ON sales(created_at DESC);
+
