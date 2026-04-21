@@ -1,35 +1,7 @@
 import { getProducts, addProduct, bookProduct } from "./api.js";
 import { renderNotification } from "./utils.js";
 
-function renderSaleCard(p) {
-    return `
-                <article class="sales-card" data-id="${p.id}">
-                    <div class="sales-card-body">
-                        <h3 class="sales-card-title">${p.title}</h3>
-                        <img class="sales-card-media" alt="${p.title}" src="${p.image || "pupupu.png"}">
-                        <p class="sales-card-description">${p.description}</p>
-                        <p class="sales-price">${p.price} ₽</p>
-                        <p class="sales-stock">${p.stock} шт</p>
-                        <p class="sales-seller-contact">${p.seller_contact}</p>
-                        <button class="sales-btn" data-action="book" data-id="${p.id}">Забронировать</button>
-                    </div>
-                </article>
-            `;
-}
-
-export async function renderSales() {
-    const panel = document.querySelector(".sales-container");
-
-    document.getElementById("products-grid")?.remove();
-
-    const products = await getProducts();
-
-    panel.innerHTML += `
-        <div id="products-grid" class="sales-grid">
-            ${products.map((p) => renderSaleCard(p)).join("")}
-        </div>
-    `;
-
+function initEventListeners(panel) {
     const formPanel = document.getElementById("addProductPanel");
     const toggleBtn = document.getElementById("toggleAddProduct");
     toggleBtn.addEventListener("click", () => {
@@ -114,4 +86,35 @@ export async function renderSales() {
             }
         }
     });
+}
+
+function renderSaleCard(p) {
+    return `
+                <article class="sales-card" data-id="${p.id}">
+                    <div class="sales-card-body">
+                        <h3 class="sales-card-title">${p.title}</h3>
+                        <img class="sales-card-media" alt="${p.title}" src="${p.image || "pupupu.png"}">
+                        <p class="sales-card-description">${p.description}</p>
+                        <p class="sales-price">${p.price} ₽</p>
+                        <p class="sales-stock">${p.stock} шт</p>
+                        <p class="sales-seller-contact">${p.seller_contact}</p>
+                        <button class="sales-btn" data-action="book" data-id="${p.id}">Забронировать</button>
+                    </div>
+                </article>
+            `;
+}
+
+export async function renderSales() {
+    const panel = document.querySelector(".sales-container");
+
+    document.getElementById("products-grid")?.remove();
+    const products = await getProducts();
+
+    panel.innerHTML += `
+        <div id="products-grid" class="sales-grid">
+            ${products.map((p) => renderSaleCard(p)).join("")}
+        </div>
+    `;
+
+    initEventListeners(panel);
 }
