@@ -383,8 +383,7 @@ body {
 .calendar-wrapper {
     overflow-x: auto;
     margin-top: 16px;
-    font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .calendar-table {
@@ -1322,14 +1321,12 @@ html {
     color: white;
 }
 
-/* ===== Контейнер ===== */
 .sales-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
 }
 
-/* ===== Шапка секции ===== */
 .sales-header {
     display: flex;
     justify-content: space-between;
@@ -1355,30 +1352,31 @@ html {
     cursor: pointer;
     transition: background 0.2s;
 }
-.toggle-form-btn:hover { background: #059669; }
-
-/* sales */
-
+.toggle-form-btn:hover {
+    background: #059669;
+}
 
 .sales-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem; /* Отступ до формы */
+    margin-bottom: 2rem;
 }
 
 .sales-card {
     background: #fff;
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 .sales-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .sales-card-body {
@@ -1438,12 +1436,14 @@ html {
     margin-top: 1rem;
     transition: background 0.2s;
 }
-.sales-btn:hover { background: #2563eb; }
+.sales-btn:hover {
+    background: #2563eb;
+}
 
 .add-product-panel {
     background: #fff;
     border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     padding: 1.5rem;
     margin-top: 1rem;
 }
@@ -1476,7 +1476,9 @@ html {
     line-height: 1;
     padding: 0.25rem;
 }
-.close-form:hover { color: #111827; }
+.close-form:hover {
+    color: #111827;
+}
 
 .product-form {
     display: flex;
@@ -1526,7 +1528,10 @@ html {
     margin-top: 0.5rem;
     transition: background 0.2s;
 }
-.form-btn:hover { background: #059669; }
+.form-btn:hover {
+    background: #059669;
+}
 
-
-.hidden { display: none !important; }
+.hidden {
+    display: none !important;
+}

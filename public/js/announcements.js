@@ -21,10 +21,7 @@ export async function renderAnnouncements() {
     }
 
     html += `<ul>${announcements
-        .map(
-            (a) =>
-                `<li><b>${a.title}</b> – ${a.body} <span class="muted">(${a.published_at})</span></li>`,
-        )
+        .map((a) => `<li><b>${a.title}</b> – ${a.body} <span class="muted">(${a.published_at})</span></li>`)
         .join("")}</ul>`;
 
     panel.innerHTML = html;
@@ -44,9 +41,7 @@ export async function renderAnnouncements() {
                 await renderAnnouncements();
             } catch (error) {
                 console.log(error);
-                renderNotification(
-                    "Ошибка публикации объявления: " + error.message,
-                );
+                renderNotification("Ошибка публикации объявления: " + error.message);
             }
         });
     }

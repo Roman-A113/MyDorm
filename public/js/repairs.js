@@ -1,9 +1,4 @@
-import {
-    getRepairCalendar,
-    bookRepair,
-    cancelBooking,
-    updateRepairStatus,
-} from "./api.js";
+import { getRepairCalendar, bookRepair, cancelBooking, updateRepairStatus } from "./api.js";
 import {
     generateCalendarDays,
     renderNotification,
@@ -80,9 +75,7 @@ function getRepairDayStatus(dateStr, specialistBookings) {
 
 function renderTimeSlot(day, time, slotBookings) {
     const freeSpots = MAX_REPAIR_BOOKINGS - slotBookings.length;
-    const myBooking = slotBookings.find(
-        (b) => b.user_id === window.currentUser.id,
-    );
+    const myBooking = slotBookings.find((b) => b.user_id === window.currentUser.id);
 
     if (myBooking) {
         return `
@@ -165,8 +158,7 @@ function openBookingModal(date, block) {
             });
             renderNotification("Заявка отправлена!", "success");
             close();
-            const currentSpecialist =
-                document.getElementById("specialist-select").value;
+            const currentSpecialist = document.getElementById("specialist-select").value;
             renderStudentRepairCalendar(currentSpecialist);
         } catch (error) {
             console.log(error);
@@ -192,8 +184,7 @@ function initStudentRepairSlotActions() {
             await cancelBooking(btn.dataset.bookingId);
             renderNotification("Запись отменена", "success");
 
-            const specialist =
-                document.getElementById("specialist-select").value;
+            const specialist = document.getElementById("specialist-select").value;
             renderStudentRepairCalendar(specialist);
         });
     });
@@ -250,8 +241,7 @@ export async function renderStudentRepairCalendar(specialist) {
 
     const rawDays = generateCalendarDays();
 
-    const getStatusCallback = (dateStr) =>
-        getRepairDayStatus(dateStr, specialistBookings);
+    const getStatusCallback = (dateStr) => getRepairDayStatus(dateStr, specialistBookings);
 
     container.innerHTML = `
             ${renderCalendarGrid(rawDays, getStatusCallback)}
@@ -393,11 +383,7 @@ function renderWorkerActionButtons(req) {
             <button class="btn btn-sm btn-reset" data-id="${req.id}" data-status="pending">Вернуть</button>
         `;
     }
-    if (
-        req.status === "completed" ||
-        req.status === "rejected" ||
-        req.status === "cancelled"
-    ) {
+    if (req.status === "completed" || req.status === "rejected" || req.status === "cancelled") {
         return `<button class="btn btn-sm btn-reset" data-id="${req.id}" data-status="pending">Вернуть в ожидание</button>`;
     }
     return "";

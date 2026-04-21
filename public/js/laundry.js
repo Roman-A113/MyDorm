@@ -67,12 +67,7 @@ function updateBookingButton() {
     }
 }
 
-async function handleCancelBooking(
-    selectedMachineId,
-    selectedDate,
-    bookingId,
-    time,
-) {
+async function handleCancelBooking(selectedMachineId, selectedDate, bookingId, time) {
     if (!confirm(`Отменить бронь на ${time}?`)) return;
 
     await cancelLaundry(bookingId);
@@ -130,13 +125,7 @@ function renderSlotsList(selectedMachineId, dateStr) {
         } else {
             if (bookingInfo.userId === window.currentUser.id) {
                 btn.classList.add("my-booking");
-                btn.onclick = () =>
-                    handleCancelBooking(
-                        selectedMachineId,
-                        dateStr,
-                        bookingInfo.bookingId,
-                        slot,
-                    );
+                btn.onclick = () => handleCancelBooking(selectedMachineId, dateStr, bookingInfo.bookingId, slot);
             } else {
                 btn.disabled = true;
             }
@@ -156,14 +145,10 @@ function renderSlotsList(selectedMachineId, dateStr) {
 
 function renderLaundryCalendar(selectedMachineId) {
     const container = document.getElementById(CALENDAR_CONTAINER_ID);
-    container.innerHTML = renderCalendarGrid(
-        generateCalendarDays(),
-        (dateStr) =>
-            getLaundryDayStatus(selectedMachineId, dateStr, allLaundryBookings),
+    container.innerHTML = renderCalendarGrid(generateCalendarDays(), (dateStr) =>
+        getLaundryDayStatus(selectedMachineId, dateStr, allLaundryBookings),
     );
-    setupCalendarClicks(CALENDAR_CONTAINER_ID, (dateStr) =>
-        renderSlotsList(selectedMachineId, dateStr),
-    );
+    setupCalendarClicks(CALENDAR_CONTAINER_ID, (dateStr) => renderSlotsList(selectedMachineId, dateStr));
 }
 
 function initMachineFilter() {

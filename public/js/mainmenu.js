@@ -32,8 +32,7 @@ async function loadMainMenu() {
     try {
         const profile = await getCurrentUser();
         window.currentUser = profile;
-        document.querySelector(".topbar h1").textContent =
-            `${profile.name} (${profile.role})`;
+        document.querySelector(".topbar h1").textContent = `${profile.name} (${profile.role})`;
 
         await renderAnnouncements();
         await renderLaundry();

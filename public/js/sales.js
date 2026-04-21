@@ -6,9 +6,7 @@ function initEventListeners(panel) {
     const toggleBtn = document.getElementById("toggleAddProduct");
     toggleBtn.addEventListener("click", () => {
         formPanel.classList.toggle("hidden");
-        toggleBtn.textContent = formPanel.classList.contains("hidden")
-            ? "+ Добавить товар"
-            : "Скрыть форму";
+        toggleBtn.textContent = formPanel.classList.contains("hidden") ? "+ Добавить товар" : "Скрыть форму";
     });
 
     const grid = document.getElementById("products-grid");
