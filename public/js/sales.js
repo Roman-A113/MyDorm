@@ -80,14 +80,15 @@ function initEventListeners(panel) {
 
 function renderSaleCard(p) {
     return `
-                <article class="sales-card" data-id="${p.id}">
+                <article class="sales-card" data-id="${escapeHtml(p.id)}">
                     <div class="sales-card-body">
-                        <h3 class="sales-card-title">${p.title}</h3>
-                        <img class="sales-card-media" alt="${p.title}" src="${p.image || "pupupu.png"}">
-                        <p class="sales-card-description">${p.description}</p>
-                        <p class="sales-price">${p.price} ₽</p>
-                        <p class="sales-stock">${p.stock} шт</p>
-                        <p class="sales-seller-contact">${p.seller_contact}</p>
+                        <h3 class="sales-card-title">${escapeHtml(p.title)}</h3>
+                        <img class="sales-card-media" alt="${escapeHtml(p.title)}" src="${p.image || "pupupu.png"}">
+                        <p class="sales-card-description">${escapeHtml(p.description)}</p>
+                        <p class="sales-price">${escapeHtml(p.price)} ₽</p>
+                        <p class="sales-stock">${escapeHtml(p.stock)} шт</p>
+                        <p class="sales-seller-contact">${escapeHtml(p.seller_contact) || ""}</p>
+                        <p class="sales-seller-contact-telegram">${escapeHtml(p.seller_contact_telegram) || ""}</p>
                         <button class="sales-btn" data-action="book" data-id="${p.id}">Забронировать</button>
                     </div>
                 </article>
@@ -107,4 +108,14 @@ export async function renderSales() {
     `;
 
     initEventListeners(panel);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }

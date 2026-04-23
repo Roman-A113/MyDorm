@@ -63,21 +63,32 @@
 
                             <label class="form-label">
                                 <span>Цена (₽) *</span>
-                                <input type="number" name="price" min="0" step="1" required />
+                                <input type="number" name="price" min="0" max="100000" step="1" required />
                             </label>
 
                             <label class="form-label">
                                 <span>Количество *</span>
-                                <input type="number" name="stock" min="0" step="1" required />
+                                <input type="number" name="stock" min="0" max="10000" step="1" required />
                             </label>
 
                             <label class="form-label">
-                                <span>Номер телефона *</span>
+                                <span>Номер телефона</span>
                                 <input
                                     type="tel"
                                     id="seller_contact"
                                     name="seller_contact"
                                     placeholder="+7 (999) 000-00-00"
+                                    maxlength="18"
+                                />
+                            </label>
+
+                            <label class="form-label"></label>
+                                <span>Ник в Телеграме</span>
+                                <input
+                                    type="nickname"
+                                    id="seller_contact_telegram"
+                                    name="seller_contact_telegram"
+                                    placeholder="@your_tg_name"
                                     maxlength="18"
                                 />
                             </label>

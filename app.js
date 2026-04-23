@@ -286,7 +286,7 @@ app.patch("/repairs/status/:id", authMiddleware, async (req, res) => {
 app.get("/products", authMiddleware, async (req, res) => {
     const { rows } = await db.query(`
         SELECT id, title, description, price, stock, 
-               image_url AS image, seller_contact, status
+               image_url AS image, seller_contact, seller_contact_telegram, status
         FROM sales
         WHERE status = 'active'
         ORDER BY created_at DESC
@@ -295,16 +295,24 @@ app.get("/products", authMiddleware, async (req, res) => {
 });
 
 app.post("/products/add", authMiddleware, upload.single("image"), async (req, res) => {
-    const { title, description, price, stock, seller_contact } = req.body;
+    const { title, description, price, stock, seller_contact, seller_contact_telegram } = req.body;
     const imagePath = req.file ? req.file.path : null;
+
+    if (!seller_contact && !seller_contact_telegram) {
+        return res.status(400).json({ error: "Заполните контактные данные" });
+    }
+
+    if (seller_contact_telegram[0] != '@') {
+        return res.status(400).json({ error: "Заполните контактные данные" });
+    }
 
     const query = `
             INSERT INTO sales (
                 title, description, price, stock, image_url, 
-                seller_contact, seller_id, status
+                seller_contact, seller_contact_telegram, seller_id, status
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, 'active')
-            RETURNING id, title, description, price, stock, image_url AS image, seller_contact, status;
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active')
+            RETURNING id, title, description, price, stock, image_url AS image, seller_contact, seller_contact_telegram, status;
         `;
 
     const values = [
@@ -314,6 +322,7 @@ app.post("/products/add", authMiddleware, upload.single("image"), async (req, re
         parseInt(stock, 10),
         imagePath,
         seller_contact,
+        seller_contact_telegram,
         req.user.id,
     ];
 

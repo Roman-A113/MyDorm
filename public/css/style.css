@@ -1429,7 +1429,8 @@ html {
 .sales-card-media {
     width: 100%;
     height: 180px;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     background: #f3f4f6;
     border-radius: 8px;
     margin-bottom: 1rem;
@@ -1444,7 +1445,7 @@ html {
     /* Занимает всё свободное место */
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    line-clamp: 3;
     /* Показывает максимум 3 строки */
     -webkit-box-orient: vertical;
 }
@@ -1457,7 +1458,8 @@ html {
 }
 
 .sales-stock,
-.sales-seller-contact {
+.sales-seller-contact
+.sales-seller-contact-telegram {
     font-size: 0.85rem;
     color: #6b7280;
     margin: 0.25rem 0;
