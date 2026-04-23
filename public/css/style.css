@@ -1344,7 +1344,7 @@ html {
 
 .toggle-form-btn {
     padding: 0.5rem 1rem;
-    background: #10b981;
+    background: #2B6CB0;
     color: white;
     border: none;
     border-radius: 8px;
@@ -1358,9 +1358,35 @@ html {
 
 .sales-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.sales-grid {
+    grid-template-columns: 1fr;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (min-width: 640px) {
+    .sales-grid {
+        grid-template-columns: repeat(2, 280px);
+        max-width: none;
+    }
+}
+
+@media (min-width: 960px) {
+    .sales-grid {
+        grid-template-columns: repeat(3, 280px);
+    }
+}
+
+@media (min-width: 1280px) {
+    .sales-grid {
+        grid-template-columns: repeat(4, 280px);
+    }
 }
 
 .sales-card {
@@ -1370,10 +1396,13 @@ html {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
+    width: 280px;
+    /* Фиксированная ширина */
     transition:
         transform 0.2s,
         box-shadow 0.2s;
 }
+
 .sales-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -1391,6 +1420,10 @@ html {
     margin: 0 0 0.5rem;
     color: #111827;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Обрезает длинное название */
 }
 
 .sales-card-media {
@@ -1408,6 +1441,12 @@ html {
     color: #6b7280;
     margin: 0.5rem 0;
     flex-grow: 1;
+    /* Занимает всё свободное место */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    /* Показывает максимум 3 строки */
+    -webkit-box-orient: vertical;
 }
 
 .sales-price {
@@ -1436,6 +1475,7 @@ html {
     margin-top: 1rem;
     transition: background 0.2s;
 }
+
 .sales-btn:hover {
     background: #2563eb;
 }
@@ -1476,6 +1516,7 @@ html {
     line-height: 1;
     padding: 0.25rem;
 }
+
 .close-form:hover {
     color: #111827;
 }
@@ -1502,7 +1543,7 @@ html {
 .form-label textarea {
     width: 100%;
     padding: 0.6rem 0.8rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid #2C5282;
     border-radius: 8px;
     font-size: 0.95rem;
     box-sizing: border-box;
@@ -1512,14 +1553,14 @@ html {
 .form-label input:focus,
 .form-label textarea:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: #2B6CB0;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .form-btn {
     width: 100%;
     padding: 0.8rem;
-    background: #10b981;
+    background: #2B6CB0;
     color: white;
     border: none;
     border-radius: 10px;
@@ -1528,8 +1569,9 @@ html {
     margin-top: 0.5rem;
     transition: background 0.2s;
 }
+
 .form-btn:hover {
-    background: #059669;
+    background: #2B6CB0;
 }
 
 .hidden {
