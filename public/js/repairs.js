@@ -1,4 +1,4 @@
-import { getRepairCalendar, bookRepair, cancelBooking, updateRepairStatus } from "./api.js";
+import { getRepairCalendar, bookRepair, cancelBooking, updateRepairStatus } from './api.js';
 import {
     generateCalendarDays,
     renderNotification,
@@ -8,44 +8,44 @@ import {
     MAX_REPAIR_BOOKINGS,
     REPAIR_TIME_BLOCKS,
     REPAIR_SPECIALISTS,
-} from "./utils.js";
+} from './utils.js';
 
-const CALENDAR_CONTAINER_ID = "calendar-content-repair";
-const PANEL_ID = "panel-repair";
+const CALENDAR_CONTAINER_ID = 'calendar-content-repair';
+const PANEL_ID = 'panel-repair';
 
 function formatDisplayDate(dateStr) {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("ru-RU", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
+    return date.toLocaleDateString('ru-RU', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
     });
 }
 
 function getSpecialistLabel(specialist) {
     return {
-        plumber: "Сантехник",
-        electrician: "Электрик",
-        carpenter: "Плотник",
+        plumber: 'Сантехник',
+        electrician: 'Электрик',
+        carpenter: 'Плотник',
     }[specialist];
 }
 
 function getStatusLabel(status) {
     return {
-        pending: "⏳ Ожидает",
-        accepted: "✅ Принято",
-        rejected: "❌ Отклонено",
-        completed: "🎉 Выполнено",
-        cancelled: "🚫 Отменено",
+        pending: '⏳ Ожидает',
+        accepted: '✅ Принято',
+        rejected: '❌ Отклонено',
+        completed: '🎉 Выполнено',
+        cancelled: '🚫 Отменено',
     }[status];
 }
 
 function getTimeLabel(block) {
     return {
-        "09-12": "🌅 Утро (09:00–12:00)",
-        "12-15": "☀️ День (12:00–15:00)",
-        "15-18": "🌤️ Вечер (15:00–18:00)",
-        "18-21": "🌙 Поздний вечер (18:00–21:00)",
+        '09-12': '🌅 Утро (09:00–12:00)',
+        '12-15': '☀️ День (12:00–15:00)',
+        '15-18': '🌤️ Вечер (15:00–18:00)',
+        '18-21': '🌙 Поздний вечер (18:00–21:00)',
     }[block];
 }
 
@@ -86,9 +86,9 @@ function renderTimeSlot(day, time, slotBookings) {
                 </div>
                 <p class="problem-text">${myBooking.problem_description}</p>
                 ${
-                    myBooking.status === "pending"
+                    myBooking.status === 'pending'
                         ? `<button class="btn btn-sm btn-cancel" data-booking-id="${myBooking.id}">Отменить запись</button>`
-                        : ""
+                        : ''
                 }
             </div>
         `;
@@ -119,9 +119,9 @@ function renderTimeSlot(day, time, slotBookings) {
 }
 
 function openBookingModal(date, block) {
-    const specialist = document.getElementById("specialist-select").value;
-    const modal = document.createElement("div");
-    modal.className = "modal";
+    const specialist = document.getElementById('specialist-select').value;
+    const modal = document.createElement('div');
+    modal.className = 'modal';
     modal.innerHTML = `
         <div class="modal-content">
             <h4>📝 Запись на ремонт: ${getSpecialistLabel(specialist)}</h4>
@@ -141,12 +141,12 @@ function openBookingModal(date, block) {
     document.body.appendChild(modal);
 
     const close = () => modal.remove();
-    modal.querySelector(".modal-close").onclick = close;
+    modal.querySelector('.modal-close').onclick = close;
     modal.onclick = (e) => {
         if (e.target === modal) close();
     };
 
-    modal.querySelector("#bookForm").onsubmit = async (e) => {
+    modal.querySelector('#bookForm').onsubmit = async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         try {
@@ -154,15 +154,15 @@ function openBookingModal(date, block) {
                 slot_date: date,
                 time_block: block,
                 specialization: specialist,
-                problem_description: fd.get("problem_description"),
+                problem_description: fd.get('problem_description'),
             });
-            renderNotification("Заявка отправлена!", "success");
+            renderNotification('Заявка отправлена!', 'success');
             close();
-            const currentSpecialist = document.getElementById("specialist-select").value;
+            const currentSpecialist = document.getElementById('specialist-select').value;
             renderStudentRepairCalendar(currentSpecialist);
         } catch (error) {
             console.log(error);
-            renderNotification("❌ " + error.message);
+            renderNotification('❌ ' + error.message);
         }
     };
 }
@@ -170,21 +170,21 @@ function openBookingModal(date, block) {
 function initStudentRepairSlotActions() {
     const panel = document.getElementById(PANEL_ID);
 
-    panel.querySelectorAll(".btn-primary").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
+    panel.querySelectorAll('.btn-primary').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
             e.stopPropagation();
             openBookingModal(btn.dataset.date, btn.dataset.block);
         });
     });
 
-    panel.querySelectorAll(".btn-cancel").forEach((btn) => {
-        btn.addEventListener("click", async (e) => {
+    panel.querySelectorAll('.btn-cancel').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            if (!confirm("Отменить запись?")) return;
+            if (!confirm('Отменить запись?')) return;
             await cancelBooking(btn.dataset.bookingId);
-            renderNotification("Запись отменена", "success");
+            renderNotification('Запись отменена', 'success');
 
-            const specialist = document.getElementById("specialist-select").value;
+            const specialist = document.getElementById('specialist-select').value;
             renderStudentRepairCalendar(specialist);
         });
     });
@@ -194,16 +194,16 @@ function renderStudentDayDetails(date, dayBookings) {
     const panel = document.getElementById(PANEL_ID);
     if (!panel) return;
 
-    panel.classList.remove("hidden");
+    panel.classList.remove('hidden');
 
     const dateObj = new Date(date);
-    const formattedDate = dateObj.toLocaleDateString("ru-RU", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
+    const formattedDate = dateObj.toLocaleDateString('ru-RU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
     });
 
-    let slotsHtml = "";
+    let slotsHtml = '';
 
     REPAIR_TIME_BLOCKS.forEach((time) => {
         const slotBookings = dayBookings[time] || [];
@@ -220,12 +220,12 @@ function renderStudentDayDetails(date, dayBookings) {
         </div>
     `;
 
-    panel.querySelector(".close-details").addEventListener("click", () => {
-        panel.classList.add("hidden");
+    panel.querySelector('.close-details').addEventListener('click', () => {
+        panel.classList.add('hidden');
         const calendarContainer = panel.parentElement;
         if (calendarContainer) {
-            calendarContainer.querySelectorAll(".calendar-day").forEach((c) => {
-                c.classList.remove("active");
+            calendarContainer.querySelectorAll('.calendar-day').forEach((c) => {
+                c.classList.remove('active');
             });
         }
     });
@@ -262,7 +262,7 @@ async function renderWorkerRepairCalendar(specialist) {
         const dayData = specialistBookings[dateStr] || {};
         let hasPending = false;
         Object.values(dayData).forEach((slots) => {
-            if (slots.some((b) => b.status === "pending")) hasPending = true;
+            if (slots.some((b) => b.status === 'pending')) hasPending = true;
         });
         return hasPending ? DAY_STATUS.MY_BOOKING : DAY_STATUS.DEFAULT;
     };
@@ -277,7 +277,7 @@ async function renderWorkerRepairCalendar(specialist) {
 }
 
 function isWorker(user) {
-    return user && ["plumber", "electrician", "carpenter"].includes(user.role);
+    return user && ['plumber', 'electrician', 'carpenter'].includes(user.role);
 }
 
 function renderRequestSlot(req) {
@@ -298,13 +298,13 @@ function renderRequestSlot(req) {
 function renderWorkerDayDetails(date, dayBookings) {
     const panel = document.getElementById(PANEL_ID);
 
-    panel.classList.remove("hidden");
+    panel.classList.remove('hidden');
 
     const dateObj = new Date(date);
-    const formattedDate = dateObj.toLocaleDateString("ru-RU", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
+    const formattedDate = dateObj.toLocaleDateString('ru-RU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
     });
 
     let allRequests = [];
@@ -316,12 +316,12 @@ function renderWorkerDayDetails(date, dayBookings) {
     });
 
     allRequests.sort((a, b) => {
-        if (a.status === "pending" && b.status !== "pending") return -1;
-        if (a.status !== "pending" && b.status === "pending") return 1;
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
         return 0;
     });
 
-    let contentHtml = "";
+    let contentHtml = '';
 
     if (allRequests.length === 0) {
         contentHtml = `<div class="empty-state" style="padding: 20px; text-align: center; color: #777;">На ${formattedDate} заявок нет 🎉</div>`;
@@ -341,12 +341,12 @@ function renderWorkerDayDetails(date, dayBookings) {
         ${contentHtml}
     `;
 
-    panel.querySelector(".close-details").addEventListener("click", () => {
-        panel.classList.add("hidden");
+    panel.querySelector('.close-details').addEventListener('click', () => {
+        panel.classList.add('hidden');
         const calendarContainer = panel.parentElement;
         if (calendarContainer) {
-            calendarContainer.querySelectorAll(".calendar-day").forEach((c) => {
-                c.classList.remove("active");
+            calendarContainer.querySelectorAll('.calendar-day').forEach((c) => {
+                c.classList.remove('active');
             });
         }
     });
@@ -356,14 +356,14 @@ function renderWorkerDayDetails(date, dayBookings) {
 function initWorkerActions() {
     const panel = document.getElementById(PANEL_ID);
 
-    panel.querySelectorAll(".req-actions button").forEach((btn) => {
-        btn.addEventListener("click", async (e) => {
+    panel.querySelectorAll('.req-actions button').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
             e.stopPropagation();
             const id = btn.dataset.id;
             const newStatus = btn.dataset.status;
 
             await updateRepairStatus(id, newStatus);
-            renderNotification("Статус обновлен", "success");
+            renderNotification('Статус обновлен', 'success');
 
             await renderShifts();
         });
@@ -371,45 +371,45 @@ function initWorkerActions() {
 }
 
 function renderWorkerActionButtons(req) {
-    if (req.status === "pending") {
+    if (req.status === 'pending') {
         return `
             <button class="btn btn-sm btn-accept" data-id="${req.id}" data-status="accepted">Принять</button>
             <button class="btn btn-sm btn-reject" data-id="${req.id}" data-status="rejected">Отклонить</button>
         `;
     }
-    if (req.status === "accepted") {
+    if (req.status === 'accepted') {
         return `
             <button class="btn btn-sm btn-complete" data-id="${req.id}" data-status="completed">Выполнено</button>
             <button class="btn btn-sm btn-reset" data-id="${req.id}" data-status="pending">Вернуть</button>
         `;
     }
-    if (req.status === "completed" || req.status === "rejected" || req.status === "cancelled") {
+    if (req.status === 'completed' || req.status === 'rejected' || req.status === 'cancelled') {
         return `<button class="btn btn-sm btn-reset" data-id="${req.id}" data-status="pending">Вернуть в ожидание</button>`;
     }
-    return "";
+    return '';
 }
 
 function initSpecialistFilter() {
-    const container = document.getElementById("shifts");
-    const filterDiv = document.createElement("div");
-    filterDiv.className = "filter";
+    const container = document.getElementById('shifts');
+    const filterDiv = document.createElement('div');
+    filterDiv.className = 'filter';
 
-    const label = document.createElement("label");
-    label.htmlFor = "specialist-select";
-    label.textContent = "🔧 Специалист:";
+    const label = document.createElement('label');
+    label.htmlFor = 'specialist-select';
+    label.textContent = '🔧 Специалист:';
 
-    const select = document.createElement("select");
-    select.id = "specialist-select";
-    select.className = "form-select";
+    const select = document.createElement('select');
+    select.id = 'specialist-select';
+    select.className = 'form-select';
 
     REPAIR_SPECIALISTS.forEach((specialist) => {
-        const option = document.createElement("option");
+        const option = document.createElement('option');
         option.value = specialist.id;
         option.textContent = specialist.name;
         select.appendChild(option);
     });
 
-    select.addEventListener("change", (e) => {
+    select.addEventListener('change', (e) => {
         const specialistId = e.target.value;
         renderStudentRepairCalendar(specialistId);
     });
@@ -425,7 +425,7 @@ export async function renderShifts() {
         await renderWorkerRepairCalendar(specialist);
     } else {
         initSpecialistFilter();
-        const specialist = document.getElementById("specialist-select").value;
+        const specialist = document.getElementById('specialist-select').value;
         await renderStudentRepairCalendar(specialist);
     }
 }
