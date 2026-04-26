@@ -1584,3 +1584,71 @@ html {
 .hidden {
     display: none !important;
 }
+
+/* Фон модального окна (затемнение) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Поверх всего остального */
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
+
+/* Когда модальное окно активно */
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Само окно с формой */
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px; /* Скругленные края, как вы любите */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Тень для объема */
+    width: 90%;
+    max-width: 500px; /* Ограничение ширины */
+    max-height: 90vh; /* Чтобы не вылезало за экран на мобильных */
+    overflow-y: auto; /* Прокрутка, если форма длинная */
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+/* Стили для крестика закрытия */
+.close-modal {
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    line-height: 1;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.form-header h4 {
+    border: 0;
+}

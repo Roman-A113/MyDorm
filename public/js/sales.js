@@ -11,12 +11,37 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+function openAddProductModal() {
+    const modal = document.getElementById('productModal');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+}
+
+function closeAddProductModal() {
+    const modal = document.getElementById('productModal');
+    modal.classList.remove('active');
+}
+
 function initEventListeners(panel) {
-    const formPanel = document.getElementById('addProductPanel');
-    const toggleBtn = document.getElementById('toggleAddProduct');
-    toggleBtn.addEventListener('click', () => {
-        formPanel.classList.toggle('hidden');
-        toggleBtn.textContent = formPanel.classList.contains('hidden') ? '+ Добавить товар' : 'Скрыть форму';
+    const closeBtn = document.querySelector('.close-modal');
+    const addProductBtn = document.getElementById('toggleAddProduct');
+
+    addProductBtn.addEventListener('click', openAddProductModal);
+    closeBtn.addEventListener('click', closeAddProductModal);
+
+    const modal = document.getElementById('productModal');
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeAddProductModal();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeAddProductModal();
+        }
     });
 
     const grid = document.getElementById('products-grid');
@@ -63,10 +88,9 @@ function initEventListeners(panel) {
         }
 
         await addProduct(fd);
-        renderNotification('Товар опубликован!', 'success');
+        closeAddProductModal();
         productForm.reset();
-        formPanel?.classList.add('hidden');
-        if (toggleBtn) toggleBtn.textContent = '+ Добавить товар';
+        renderNotification('Товар опубликован!', 'success');
         renderSales();
     });
 
