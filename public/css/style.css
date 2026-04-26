@@ -1,6 +1,6 @@
 :root {
     --card: #ffffff;
-    --accent: #2b6cb0;
+    --accent: #3b82f6;
     --accent-dark: #2c5282;
     --text: #1a202c;
     --muted: #4a5568;
@@ -383,7 +383,7 @@ body {
 .calendar-wrapper {
     overflow-x: auto;
     margin-top: 16px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .calendar-table {
@@ -1011,7 +1011,6 @@ html {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    /* 7 дней в неделю */
     gap: 8px;
     padding: 10px;
     background: #f9f9f9;
@@ -1045,10 +1044,8 @@ html {
     font-weight: bold;
 }
 
-/* Индикаторы состояния дня */
 .calendar-day.has-booking {
     border-left: 4px solid #28a745;
-    /* Зеленая полоска, если есть запись */
 }
 
 .calendar-day.is-full {
@@ -1104,7 +1101,6 @@ html {
     gap: 15px;
 }
 
-/* Карточка слота в деталях */
 .slot-detail-card {
     border: 1px solid #eee;
     border-radius: 6px;
@@ -1123,7 +1119,7 @@ html {
 }
 
 .slot-detail-card.available {
-    border-left: 4px solid #007bff;
+    border-left: 4px solid #3b82f6;
 }
 
 .slot-info {
@@ -1250,7 +1246,6 @@ html {
     display: none;
 }
 
-/* Карточка заявки для мастера */
 .master-requests-list {
     display: flex;
     flex-direction: column;
@@ -1268,16 +1263,16 @@ html {
 
 .request-card.status-pending {
     border-left-color: #ff9800;
-} /* Оранжевый */
+}
 .request-card.status-accepted {
-    border-left-color: #2196f3;
-} /* Синий */
+    border-left-color: #3b82f6;
+}
 .request-card.status-completed {
     border-left-color: #4caf50;
-} /* Зеленый */
+}
 .request-card.status-rejected {
     border-left-color: #f44336;
-} /* Красный */
+}
 
 .req-header {
     display: flex;
@@ -1305,7 +1300,7 @@ html {
 }
 
 .btn-accept {
-    background-color: #2196f3;
+    background-color: #3b82f6;
     color: white;
 }
 .btn-reject {
@@ -1344,7 +1339,7 @@ html {
 
 .toggle-form-btn {
     padding: 0.5rem 1rem;
-    background: #2B6CB0;
+    background: #3b82f6;
     color: white;
     border: none;
     border-radius: 8px;
@@ -1353,7 +1348,7 @@ html {
     transition: background 0.2s;
 }
 .toggle-form-btn:hover {
-    background: #059669;
+    background: #2563eb;
 }
 
 .sales-grid {
@@ -1397,7 +1392,6 @@ html {
     display: flex;
     flex-direction: column;
     width: 280px;
-    /* Фиксированная ширина */
     transition:
         transform 0.2s,
         box-shadow 0.2s;
@@ -1423,7 +1417,6 @@ html {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Обрезает длинное название */
 }
 
 .sales-card-media {
@@ -1442,11 +1435,9 @@ html {
     color: #6b7280;
     margin: 0.5rem 0;
     flex-grow: 1;
-    /* Занимает всё свободное место */
     overflow: hidden;
     display: -webkit-box;
     line-clamp: 3;
-    /* Показывает максимум 3 строки */
     -webkit-box-orient: vertical;
 }
 
@@ -1458,15 +1449,21 @@ html {
 }
 
 .sales-stock,
-.sales-seller-contact
-.sales-seller-contact-telegram {
+.sales-seller-contact .sales-seller-contact-telegram {
     font-size: 0.85rem;
     color: #6b7280;
     margin: 0.25rem 0;
 }
 
+.sales-btn-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
 .sales-btn {
-    width: 100%;
+    width: 50%;
     padding: 0.75rem;
     background: #3b82f6;
     color: white;
@@ -1478,8 +1475,16 @@ html {
     transition: background 0.2s;
 }
 
+.sales-btn.red {
+    background: #f84639;
+}
+
 .sales-btn:hover {
     background: #2563eb;
+}
+
+.sales-btn.red:hover {
+    background: #e23428;
 }
 
 .add-product-panel {
@@ -1545,7 +1550,7 @@ html {
 .form-label textarea {
     width: 100%;
     padding: 0.6rem 0.8rem;
-    border: 1px solid #2C5282;
+    border: 1px solid #2c5282;
     border-radius: 8px;
     font-size: 0.95rem;
     box-sizing: border-box;
@@ -1555,14 +1560,14 @@ html {
 .form-label input:focus,
 .form-label textarea:focus {
     outline: none;
-    border-color: #2B6CB0;
+    border-color: #2b6cb0;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .form-btn {
     width: 100%;
     padding: 0.8rem;
-    background: #2B6CB0;
+    background: #3b82f6;
     color: white;
     border: none;
     border-radius: 10px;
@@ -1573,7 +1578,7 @@ html {
 }
 
 .form-btn:hover {
-    background: #2B6CB0;
+    background: #2361c5;
 }
 
 .hidden {

@@ -286,7 +286,7 @@ app.patch('/repairs/status/:id', authMiddleware, async (req, res) => {
 app.get('/products', authMiddleware, async (req, res) => {
     const { rows } = await db.query(`
         SELECT id, title, description, price, stock, 
-               image_url AS image, seller_contact, seller_contact_telegram, status
+               image_url AS image, seller_contact, seller_contact_telegram, seller_id, status
         FROM sales
         WHERE status = 'active'
         ORDER BY created_at DESC

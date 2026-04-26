@@ -107,27 +107,46 @@ function initEventListeners(panel) {
 }
 
 function renderSaleCard(p) {
+    const isOwner = String(p.seller_id) === String(window.currentUser.id);
+    let actionButtons = '';
+    if (isOwner) {
+        actionButtons = `
+            <div class="sales-btn-wrapper">
+                <button class="sales-btn" data-action="edit" data-id="${escapeHtml(p.id)}">Изменить</button>
+                <button class="sales-btn red" data-action="delete" data-id="${escapeHtml(p.id)}">Удалить</button>
+            </div>
+        `;
+    }
+
     return `
-                <article class="sales-card" data-id="${escapeHtml(p.id)}">
-                    <div class="sales-card-body">
-                        <h3 class="sales-card-title">${escapeHtml(p.title)}</h3>
-                        <img class="sales-card-media" alt="${escapeHtml(p.title)}" src="${p.image || 'pupupu.png'}">
-                        <p class="sales-card-description">${escapeHtml(p.description)}</p>
-                        <p class="sales-price">${escapeHtml(p.price)} ₽</p>
-                        <p class="sales-stock">${escapeHtml(p.stock)} шт</p>
-                        <p class="sales-seller-contact">${escapeHtml(p.seller_contact) || ''}</p>
-                        <p class="sales-seller-contact-telegram">${escapeHtml(p.seller_contact_telegram) || ''}</p>
-                        <button class="sales-btn" data-action="book" data-id="${p.id}">Забронировать</button>
-                    </div>
-                </article>
-            `;
+        <article class="sales-card" data-id="${escapeHtml(p.id)}">
+            <div class="sales-card-body">
+                <h3 class="sales-card-title">${escapeHtml(p.title)}</h3>
+                <img class="sales-card-media" alt="${escapeHtml(p.title)}" src="${p.image || 'pupupu.png'}">
+                <p class="sales-card-description">${escapeHtml(p.description)}</p>
+                <p class="sales-price">${escapeHtml(p.price)} ₽</p>
+                <p class="sales-stock">${escapeHtml(p.stock)} шт</p>
+                ${p.seller_contact ? `<p class="sales-seller-contact">${escapeHtml(p.seller_contact)}</p>` : ''}
+                ${p.seller_contact_telegram ? `<p class="sales-seller-contact-telegram">${escapeHtml(p.seller_contact_telegram)}</p>` : ''}
+                ${actionButtons}
+            </div>
+        </article>
+    `;
 }
 
 export async function renderSales() {
     const panel = document.querySelector('.sales-container');
-
     document.getElementById('products-grid')?.remove();
+
     const products = await getProducts();
+    const currentUserId = window.currentUser.id;
+    products.sort((a, b) => {
+        const aIsOwner = String(a.seller_id) === String(currentUserId);
+        const bIsOwner = String(b.seller_id) === String(currentUserId);
+        if (aIsOwner && !bIsOwner) return -1;
+        if (!aIsOwner && bIsOwner) return 1;
+        return 0;
+    });
 
     panel.innerHTML += `
         <div id="products-grid" class="sales-grid">
