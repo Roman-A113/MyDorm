@@ -322,33 +322,10 @@ app.post('/products/add', authMiddleware, upload.single('image'), async (req, re
     res.status(201).json(rows[0]);
 });
 
-app.post('/products/book', authMiddleware, async (req, res) => {
-    const { product_id } = req.body;
-    const {
-        rows: [product],
-    } = await db.query('SELECT id, stock, status FROM sales WHERE id = $1', [product_id]);
-
-    if (!product) {
-        return res.status(404).json({ error: 'Товар не найден' });
-    }
-    if (product.stock <= 0 || product.status !== 'active') {
-        return res.status(409).json({ error: 'Товар недоступен' });
-    }
-
-    const {
-        rows: [updated],
-    } = await db.query(
-        `
-            UPDATE sales 
-            SET stock = stock - 1,
-                status = CASE WHEN stock - 1 = 0 THEN 'sold' ELSE status END
-            WHERE id = $1 AND stock > 0
-            RETURNING id, stock, status;
-        `,
-        [product_id],
-    );
-
-    res.json({ success: true, remaining: updated.stock });
+app.delete('/products/delete/:productId', authMiddleware, async (req, res) => {
+    const productId = req.params.productId;
+    await db.query(`DELETE FROM sales WHERE id = $1;`, [productId]);
+    res.json({ status: 'ok' });
 });
 
 const port = process.env.PORT || 3000;

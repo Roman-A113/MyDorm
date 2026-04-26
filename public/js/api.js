@@ -88,15 +88,14 @@ export async function addProduct(payload) {
     return handleResponse(res);
 }
 
-export async function bookProduct(productId) {
-    const path = '/products/book';
+export async function deleteProduct(productId) {
+    const path = `/products/delete/${productId}`;
     const res = await fetch(`${API_BASE}${path}`, {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify({ product_id: productId }),
     });
     return handleResponse(res);
 }

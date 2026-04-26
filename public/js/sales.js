@@ -1,5 +1,15 @@
-import { getProducts, addProduct, bookProduct } from './api.js';
+import { getProducts, addProduct, deleteProduct } from './api.js';
 import { renderNotification } from './utils.js';
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 function initEventListeners(panel) {
     const formPanel = document.getElementById('addProductPanel');
@@ -11,12 +21,20 @@ function initEventListeners(panel) {
 
     const grid = document.getElementById('products-grid');
     grid.addEventListener('click', async (e) => {
-        const btn = e.target.closest("[data-action='book']");
-        if (!btn) return;
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
 
-        const productId = btn.dataset.id;
-        await bookProduct(productId);
-        renderNotification('Товар забронирован!', 'success');
+        const action = button.dataset.action;
+        const productId = button.dataset.id;
+
+        if (action === 'edit') {
+            // await editProduct(productId);
+        } else if (action === 'delete') {
+            if (confirm('Вы уверены, что хотите удалить объявление?')) {
+                await deleteProduct(productId);
+                renderNotification('Объявление успешно удалено', 'success');
+            }
+        }
         renderSales();
     });
 
@@ -155,14 +173,4 @@ export async function renderSales() {
     `;
 
     initEventListeners(panel);
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
 }
