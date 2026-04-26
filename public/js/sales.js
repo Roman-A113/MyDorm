@@ -78,6 +78,13 @@ function validateForm() {
             return false;
         }
     }
+
+    const productName = document.getElementById('productName').value;
+    if (!productName) {
+        renderNotification('Введите название товара', 'error');
+        return false;
+    }
+
     return true;
 }
 
@@ -125,9 +132,9 @@ function initEventListeners(panel, products) {
     const productForm = document.getElementById('product-form');
     productForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const fd = new FormData(productForm);
 
         if (!validateForm()) return;
+        const fd = new FormData(productForm);
 
         await addProduct(fd);
         closeAddProductModal();
@@ -139,9 +146,8 @@ function initEventListeners(panel, products) {
     btnUpdate.addEventListener('click', async (e) => {
         e.preventDefault();
         const productId = productForm.querySelector('input[name="product_id"]')?.value;
-
-        const fd = new FormData(productForm);
         if (!validateForm()) return;
+        const fd = new FormData(productForm);
 
         await updateProduct(productId, fd);
         renderNotification('Изменения сохранены', 'success');
