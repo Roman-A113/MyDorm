@@ -7,8 +7,7 @@ export async function renderAnnouncements() {
 
     let html = '<h3>Объявления</h3>';
 
-    if (window.currentUser?.role === 'admin') {
-        html += `
+    html += `
       <div class="panel-card">
         <h4>Создать объявление</h4>
         <form id="noticeCreateForm" class="simple-form">
@@ -18,7 +17,6 @@ export async function renderAnnouncements() {
         </form>
       </div>
     `;
-    }
 
     html += `<ul>${announcements
         .map((a) => `<li><b>${a.title}</b> – ${a.body} <span class="muted">(${a.published_at})</span></li>`)
@@ -26,23 +24,21 @@ export async function renderAnnouncements() {
 
     panel.innerHTML = html;
 
-    if (window.currentUser?.role === 'admin') {
-        const form = document.getElementById('noticeCreateForm');
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const fd = new FormData(form);
-            try {
-                await createAnnouncement({
-                    title: fd.get('title'),
-                    body: fd.get('body'),
-                });
-                renderNotification('Объявление опубликовано', 'success');
-                form.reset();
-                await renderAnnouncements();
-            } catch (error) {
-                console.log(error);
-                renderNotification('Ошибка публикации объявления: ' + error.message);
-            }
-        });
-    }
+    const form = document.getElementById('noticeCreateForm');
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const fd = new FormData(form);
+        try {
+            await createAnnouncement({
+                title: fd.get('title'),
+                body: fd.get('body'),
+            });
+            renderNotification('Объявление опубликовано', 'success');
+            form.reset();
+            await renderAnnouncements();
+        } catch (error) {
+            console.log(error);
+            renderNotification('Ошибка публикации объявления: ' + error.message);
+        }
+    });
 }

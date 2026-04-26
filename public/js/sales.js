@@ -67,7 +67,7 @@ function initEventListeners(panel, products) {
         }
     });
 
-    const grid = document.getElementById('products-grid');
+    const grid = document.getElementById('products-grid-my');
     grid.addEventListener('click', async (e) => {
         const button = event.target.closest('button[data-action]');
         if (!button) return;
@@ -215,21 +215,23 @@ function renderSaleCard(p) {
 
 export async function renderSales() {
     const panel = document.querySelector('.sales-container');
-    document.getElementById('products-grid')?.remove();
-
+    document.getElementById('products-grid-wrapper')?.remove();
     const products = await getProducts();
     const currentUserId = window.currentUser.id;
-    products.sort((a, b) => {
-        const aIsOwner = String(a.seller_id) === String(currentUserId);
-        const bIsOwner = String(b.seller_id) === String(currentUserId);
-        if (aIsOwner && !bIsOwner) return -1;
-        if (!aIsOwner && bIsOwner) return 1;
-        return 0;
-    });
+
+    const currentUserProducts = products.filter((p) => p.seller_id == currentUserId);
+    const otherUserProducts = products.filter((p) => p.seller_id !== currentUserId);
 
     panel.innerHTML += `
-        <div id="products-grid" class="sales-grid">
-            ${products.map((p) => renderSaleCard(p)).join('')}
+        <div id="products-grid-wrapper">
+            <h3>Мои товары:</h3>
+            <div id="products-grid-my" class="sales-grid">
+                ${currentUserProducts.map((p) => renderSaleCard(p)).join('')}
+            </div>
+            <h3>Продается:</h3>
+            <div id="products-grid-other" class="sales-grid">
+                ${otherUserProducts.map((p) => renderSaleCard(p)).join('')}
+            </div>
         </div>
     `;
 

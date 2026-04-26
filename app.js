@@ -116,7 +116,6 @@ app.get('/announcements', authMiddleware, async (req, res) => {
 });
 
 app.post('/announcements', authMiddleware, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Только админ' });
     const { title, body } = req.body;
     if (!title || !body) return res.status(400).json({ error: 'Заполните поля' });
 
