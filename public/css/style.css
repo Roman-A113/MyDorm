@@ -22,7 +22,7 @@ body {
         Helvetica,
         Arial,
         sans-serif;
-    background: white;
+    background: rgb(255, 255, 255);
     line-height: 1.5;
     min-height: 100vh;
     margin: 0;
@@ -1372,43 +1372,27 @@ html {
     display: grid;
     gap: 1.5rem;
     margin-bottom: 2rem;
-    justify-content: center;
-}
 
-.sales-grid {
-    grid-template-columns: 1fr;
-    max-width: 280px;
+    grid-template-columns: repeat(auto-fill, 280px);
+
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
-}
-
-@media (min-width: 640px) {
-    .sales-grid {
-        grid-template-columns: repeat(2, 280px);
-        max-width: none;
-    }
-}
-
-@media (min-width: 960px) {
-    .sales-grid {
-        grid-template-columns: repeat(3, 280px);
-    }
-}
-
-@media (min-width: 1280px) {
-    .sales-grid {
-        grid-template-columns: repeat(4, 280px);
-    }
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
 .sales-card {
-    background: #fff;
+    background: #f7f7f7;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
+
     width: 280px;
+    max-width: 280px;
+
     transition:
         transform 0.2s,
         box-shadow 0.2s;
@@ -1677,4 +1661,206 @@ html {
     color: #888;
     font-style: italic;
     width: 100%;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 4rem 1rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Легкий градиент */
+    border-radius: 0 0 20px 20px;
+}
+
+.hero h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #555;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Features Section */
+.features-section {
+    padding: 3rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: #333;
+}
+
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.role-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+    border-top: 5px solid transparent;
+}
+
+.role-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Цветовая кодировка ролей */
+.role-card.student {
+    border-color: #3498db;
+} /* Синий */
+.role-card.worker {
+    border-color: #f39c12;
+} /* Оранжевый */
+.role-card.admin {
+    border-color: #9b59b6;
+} /* Фиолетовый */
+
+.card-header h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    margin-bottom: 0.8rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.feature-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* Benefits Section */
+.benefits-section {
+    background: #f9f9f9;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.benefits-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.benefit-item {
+    flex: 1 1 250px;
+    padding: 1.5rem;
+}
+
+.benefit-item .icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-outline {
+    border: 2px solid #3498db;
+    color: #3498db;
+}
+
+.btn-outline:hover {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-footer a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+#announcements ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#announcements li {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all;
+}
+
+#announcements li b {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+#announcements .muted {
+    display: block;
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 0.5rem;
 }
