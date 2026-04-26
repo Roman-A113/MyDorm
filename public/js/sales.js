@@ -250,11 +250,19 @@ export async function renderSales() {
         <div id="products-grid-wrapper">
             <h3>Мои товары:</h3>
             <div id="products-grid-my" class="sales-grid">
-                ${currentUserProducts.map((p) => renderSaleCard(p)).join('')}
+                ${
+                    currentUserProducts.length > 0
+                        ? currentUserProducts.map((p) => renderSaleCard(p)).join('')
+                        : '<div class="empty-message">У вас нет опубликованных товаров</div>'
+                }
             </div>
             <h3>Продается:</h3>
             <div id="products-grid-other" class="sales-grid">
-                ${otherUserProducts.map((p) => renderSaleCard(p)).join('')}
+                ${
+                    otherUserProducts.length > 0
+                        ? otherUserProducts.map((p) => renderSaleCard(p)).join('')
+                        : '<div class="empty-message">Другие пользователи еще не опубликовали товары</div>'
+                }
             </div>
         </div>
     `;

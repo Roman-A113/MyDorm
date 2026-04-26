@@ -1669,3 +1669,12 @@ html {
 .form-header h4 {
     border: 0;
 }
+
+.sales-grid .empty-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: #888;
+    font-style: italic;
+    width: 100%;
+}
