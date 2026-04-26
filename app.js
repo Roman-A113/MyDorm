@@ -328,6 +328,38 @@ app.delete('/products/delete/:productId', authMiddleware, async (req, res) => {
     res.json({ status: 'ok' });
 });
 
+app.put('/product/update/:productId', upload.single('image'), async (req, res) => {
+    const productId = req.params.productId;
+    const { title, description, price, stock, seller_contact, seller_contact_telegram } = req.body;
+    const newImagePath = req.file ? req.file.path : null;
+
+    const oldProductRes = await db.query('SELECT * FROM sales WHERE id = $1', [productId]);
+    const oldProduct = oldProductRes.rows[0];
+
+    const oldImagePath = oldProductRes.rows[0].image_url;
+
+    let finalImagePath = oldImagePath;
+    if (newImagePath) {
+        if (oldImagePath) fs.unlinkSync(oldImagePath);
+        finalImagePath = newImagePath;
+    }
+
+    await db.query(
+        `UPDATE sales 
+             SET title = $1, 
+                 description = $2, 
+                 price = $3, 
+                 stock = $4, 
+                 seller_contact = $5, 
+                 seller_contact_telegram = $6, 
+                 image_url = $7 
+             WHERE id = $8`,
+        [title, description, price, stock, seller_contact, seller_contact_telegram, finalImagePath, productId],
+    );
+
+    res.json({ status: 'ok' });
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);

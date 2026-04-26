@@ -41,61 +41,67 @@
                         <h3>Продаётся</h3>
                         <button id="toggleAddProduct" class="toggle-form-btn">+ Добавить товар</button>
                     </div>
-                    <div id="addProductPanel" class="add-product-panel hidden">
-                        <form id="product-form" class="product-form" enctype="multipart/form-data">
-                            <div class="form-header">
-                                <h4>Новый товар</h4>
-                            </div>
+                    <div id="productModal" class="modal-overlay hidden">
+                        <div class="modal-content">
+                            <form id="product-form" class="product-form" enctype="multipart/form-data">
+                                <div class="form-header">
+                                    <h4>Новый товар</h4>
+                                    <span class="close-modal">&times;</span>
+                                </div>
 
-                            <label class="form-label">
-                                <span>Название *</span>
-                                <input type="text" name="title" required placeholder="Например: Джинсы" />
-                            </label>
+                                <label class="form-label">
+                                    <span>Название *</span>
+                                    <input type="text" name="title" required placeholder="Например: Джинсы" />
+                                </label>
 
-                            <label class="form-label">
-                                <span>Фото</span>
-                                <input type="file" name="image" accept="image/*" />
-                            </label>
+                                <label class="form-label">
+                                    <span>Фото</span>
+                                    <input type="file" name="image" accept="image/*" />
+                                </label>
 
-                            <label class="form-label">
-                                <span>Описание</span>
-                                <textarea name="description" rows="3" placeholder="Состояние, размер..."></textarea>
-                            </label>
+                                <label class="form-label">
+                                    <span>Описание</span>
+                                    <textarea name="description" rows="3" placeholder="Состояние, размер..."></textarea>
+                                </label>
 
-                            <label class="form-label">
-                                <span>Цена (₽) *</span>
-                                <input type="number" name="price" min="0" max="100000" step="1" required />
-                            </label>
+                                <label class="form-label">
+                                    <span>Цена (₽) *</span>
+                                    <input type="number" name="price" min="0" max="100000" step="1" required />
+                                </label>
 
-                            <label class="form-label">
-                                <span>Количество *</span>
-                                <input type="number" name="stock" min="0" max="10000" step="1" required />
-                            </label>
+                                <label class="form-label">
+                                    <span>Количество *</span>
+                                    <input type="number" name="stock" min="0" max="10000" step="1" required />
+                                </label>
 
-                            <label class="form-label">
-                                <span>Номер телефона</span>
-                                <input
-                                    type="tel"
-                                    id="seller_contact"
-                                    name="seller_contact"
-                                    placeholder="+7 (999) 000-00-00"
-                                    maxlength="18"
-                                />
-                            </label>
+                                <label class="form-label">
+                                    <span>Номер телефона</span>
+                                    <input
+                                        type="tel"
+                                        id="seller_contact"
+                                        name="seller_contact"
+                                        placeholder="+7 (999) 000-00-00"
+                                        maxlength="18"
+                                    />
+                                </label>
 
-                            <label class="form-label">
-                                <span>Ник в Телеграме</span>
-                                <input
-                                    type="text"
-                                    id="seller_contact_telegram"
-                                    name="seller_contact_telegram"
-                                    placeholder="@your_tg_name"
-                                    maxlength="18"
-                                />
-                            </label>
+                                <label class="form-label">
+                                    <span>Ник в Телеграме</span>
+                                    <input
+                                        type="text"
+                                        id="seller_contact_telegram"
+                                        name="seller_contact_telegram"
+                                        placeholder="@your_tg_name"
+                                        maxlength="18"
+                                    />
+                                </label>
 
-                            <button type="submit" class="form-btn">Опубликовать</button>
-                        </form>
+                                <button type="submit" class="form-btn" id="btn-create-product">Опубликовать</button>
+                                <button type="button" id="btn-update-product" class="form-btn" style="display: none">
+                                    Сохранить изменения
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </section>

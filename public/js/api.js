@@ -100,6 +100,16 @@ export async function deleteProduct(productId) {
     return handleResponse(res);
 }
 
+export async function updateProduct(productId, formData) {
+    const path = `/product/update/${productId}`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'PUT',
+        body: formData,
+    });
+
+    return handleResponse(res);
+}
+
 export async function createAnnouncement(payload) {
     const path = '/announcements';
     const res = await fetch(`${API_BASE}${path}`, {
