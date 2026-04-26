@@ -9,20 +9,21 @@
 
     <body>
         <header class="topbar">
-            <h1>Главное меню</h1>
-            <div class="actions">
-                <button id="logoutBtn" class="btn">Выйти</button>
+            <div class="topbar-box">
+                <h1>Главное меню</h1>
+                <div class="actions">
+                    <button id="logoutBtn" class="btn">Выйти</button>
+                </div>
             </div>
         </header>
 
-        <nav class="tabs">
-            <button class="tabBtn active" data-tab="announcements">Объявления</button>
-            <button class="tabBtn" data-tab="laundry">Стирка</button>
-            <button class="tabBtn" data-tab="shifts">Ремонт</button>
-            <button class="tabBtn" data-tab="sales">Продажи</button>
-        </nav>
-
         <main class="mainmenu-content">
+            <nav class="tabs">
+                <button class="tabBtn active" data-tab="announcements">Объявления</button>
+                <button class="tabBtn" data-tab="laundry">Стирка</button>
+                <button class="tabBtn" data-tab="shifts">Ремонт</button>
+                <button class="tabBtn" data-tab="sales">Продажи</button>
+            </nav>
             <section id="announcements" class="tab active"></section>
             <section id="laundry" class="tab hidden">
                 <div class="filter">
