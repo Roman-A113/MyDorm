@@ -50,7 +50,13 @@
 
                                 <label class="form-label">
                                     <span>Название *</span>
-                                    <input type="text" name="title" id="productName" required placeholder="Например: Джинсы" />
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        id="productName"
+                                        required
+                                        placeholder="Например: Джинсы"
+                                    />
                                 </label>
 
                                 <label class="form-label">
@@ -70,7 +76,15 @@
 
                                 <label class="form-label">
                                     <span>Количество *</span>
-                                    <input type="number" name="stock" min="0" max="1000000" step="1" required />
+                                    <input
+                                        type="number"
+                                        name="stock"
+                                        min="1"
+                                        max="1000000"
+                                        step="1"
+                                        value="1"
+                                        required
+                                    />
                                 </label>
 
                                 <label class="form-label">
@@ -95,7 +109,7 @@
                                 </label>
 
                                 <button type="submit" class="form-btn" id="btn-create-product">Опубликовать</button>
-                                <button type="button" id="btn-update-product" class="form-btn" style="display: none">
+                                <button type="submit" id="btn-update-product" class="form-btn" style="display: none">
                                     Сохранить изменения
                                 </button>
                             </form>
