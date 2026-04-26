@@ -142,6 +142,9 @@ function initEventListeners(panel, products) {
 
         await updateProduct(productId, fd);
         renderNotification('Изменения сохранены', 'success');
+        document.getElementById('btn-create-product').style.display = 'block';
+        document.getElementById('btn-update-product').style.display = 'none';
+        productForm.reset();
         closeAddProductModal();
         renderSales();
     });
