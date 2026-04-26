@@ -1,4 +1,4 @@
-import { getProducts, addProduct, deleteProduct } from './api.js';
+import { getProducts, addProduct, deleteProduct, updateProduct } from './api.js';
 import { renderNotification } from './utils.js';
 
 function escapeHtml(str) {
@@ -24,7 +24,30 @@ function closeAddProductModal() {
     modal.classList.remove('active');
 }
 
-function initEventListeners(panel) {
+function fillFormWithProductData(product) {
+    const form = document.getElementById('product-form');
+    form.querySelector('[name="title"]').value = product.title;
+    form.querySelector('[name="description"]').value = product.description;
+    form.querySelector('[name="price"]').value = product.price;
+    form.querySelector('[name="stock"]').value = product.stock;
+
+    document.getElementById('seller_contact').value = product.seller_contact;
+    document.getElementById('seller_contact_telegram').value = product.seller_contact_telegram;
+
+    document.getElementById('btn-create-product').style.display = 'none';
+    document.getElementById('btn-update-product').style.display = 'block';
+
+    let hiddenId = form.querySelector('input[name="product_id"]');
+    if (!hiddenId) {
+        hiddenId = document.createElement('input');
+        hiddenId.type = 'hidden';
+        hiddenId.name = 'product_id';
+        form.appendChild(hiddenId);
+    }
+    hiddenId.value = product.id;
+}
+
+function initEventListeners(panel, products) {
     const closeBtn = document.querySelector('.close-modal');
     const addProductBtn = document.getElementById('toggleAddProduct');
 
@@ -53,14 +76,16 @@ function initEventListeners(panel) {
         const productId = button.dataset.id;
 
         if (action === 'edit') {
-            // await editProduct(productId);
+            openAddProductModal();
+            const productToEdit = products.find((p) => String(p.id) === String(productId));
+            fillFormWithProductData(productToEdit);
         } else if (action === 'delete') {
             if (confirm('Вы уверены, что хотите удалить объявление?')) {
                 await deleteProduct(productId);
                 renderNotification('Объявление успешно удалено', 'success');
+                renderSales();
             }
         }
-        renderSales();
     });
 
     const productForm = document.getElementById('product-form');
@@ -91,6 +116,18 @@ function initEventListeners(panel) {
         closeAddProductModal();
         productForm.reset();
         renderNotification('Товар опубликован!', 'success');
+        renderSales();
+    });
+
+    const btnUpdate = document.getElementById('btn-update-product');
+    btnUpdate.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const productId = productForm.querySelector('input[name="product_id"]')?.value;
+
+        const fd = new FormData(productForm);
+        await updateProduct(productId, fd);
+        renderNotification('Изменения сохранены', 'success');
+        closeAddProductModal();
         renderSales();
     });
 
@@ -196,5 +233,5 @@ export async function renderSales() {
         </div>
     `;
 
-    initEventListeners(panel);
+    initEventListeners(panel, products);
 }
