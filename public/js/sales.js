@@ -47,6 +47,36 @@ function fillFormWithProductData(product) {
     hiddenId.value = product.id;
 }
 
+function validateForm() {
+    const productForm = document.getElementById('product-form');
+    const inputs = productForm.querySelectorAll(
+        'input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="password"], textarea, select',
+    );
+
+    inputs.forEach((input) => {
+        if (typeof input.value === 'string') {
+            input.value = input.value.trim();
+        }
+    });
+
+    const sellerPhoneNumber = document.getElementById('seller_contact').value;
+    const sellerContactTelegram = document.getElementById('seller_contact_telegram').value;
+
+    if (!sellerPhoneNumber && !sellerContactTelegram) {
+        renderNotification('Заполните контактные данные', 'error');
+        return false;
+    }
+
+    if (sellerPhoneNumber) {
+        const phoneRegex = /^(\+\d+|8) \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
+        if (!phoneRegex.test(sellerPhoneNumber)) {
+            renderNotification('Неверный формат номера телефона', 'error');
+            return false;
+        }
+    }
+    return true;
+}
+
 function initEventListeners(panel, products) {
     const closeBtn = document.querySelector('.close-modal');
     const addProductBtn = document.getElementById('toggleAddProduct');
@@ -91,26 +121,9 @@ function initEventListeners(panel, products) {
     const productForm = document.getElementById('product-form');
     productForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
-        const inputs = productForm.querySelectorAll(
-            'input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="password"], textarea, select',
-        );
-
-        inputs.forEach((input) => {
-            if (typeof input.value === 'string') {
-                input.value = input.value.trim();
-            }
-        });
-
         const fd = new FormData(productForm);
 
-        const sellerPhoneNumber = document.getElementById('seller_contact').value;
-        const sellerContactTelegram = document.getElementById('seller_contact_telegram').value;
-
-        if (!sellerPhoneNumber && !sellerContactTelegram) {
-            renderNotification('Заполните контактные данные', 'error');
-            return;
-        }
+        if (!validateForm()) return;
 
         await addProduct(fd);
         closeAddProductModal();
@@ -125,6 +138,8 @@ function initEventListeners(panel, products) {
         const productId = productForm.querySelector('input[name="product_id"]')?.value;
 
         const fd = new FormData(productForm);
+        if (!validateForm()) return;
+
         await updateProduct(productId, fd);
         renderNotification('Изменения сохранены', 'success');
         closeAddProductModal();
