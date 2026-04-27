@@ -143,7 +143,7 @@ function initEventListeners(panel, products) {
     });
 
     const btnUpdate = document.getElementById('btn-update-product');
-    btnUpdate.addEventListener('submit', async (e) => {
+    btnUpdate.addEventListener('click', async (e) => {
         e.preventDefault();
         const productId = productForm.querySelector('input[name="product_id"]')?.value;
         if (!validateForm()) return;
