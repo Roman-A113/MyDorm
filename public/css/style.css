@@ -1339,7 +1339,7 @@ html {
     padding: 1rem;
 }
 
-.sales-header {
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1348,7 +1348,7 @@ html {
     border-bottom: 1px solid #e5e7eb;
 }
 
-.sales-header h3 {
+.header h3 {
     margin: 0;
     font-size: 1.5rem;
     color: #111827;
@@ -1586,7 +1586,6 @@ html {
     display: none !important;
 }
 
-/* Фон модального окна (затемнение) */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1611,16 +1610,15 @@ html {
     visibility: visible;
 }
 
-/* Само окно с формой */
 .modal-content {
     background-color: #fff;
     padding: 20px;
-    border-radius: 12px; /* Скругленные края, как вы любите */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Тень для объема */
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     width: 90%;
-    max-width: 500px; /* Ограничение ширины */
-    max-height: 90vh; /* Чтобы не вылезало за экран на мобильных */
-    overflow-y: auto; /* Прокрутка, если форма длинная */
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
     transform: translateY(-20px);
     transition: transform 0.3s ease;
@@ -1716,22 +1714,22 @@ html {
     .roles-grid {
         grid-template-columns: repeat(2, 1fr);
         grid-template-areas:
-            "student worker"
-            "admin admin";
+            'student worker'
+            'admin admin';
     }
-    
+
     .role-card.student {
         grid-area: student;
         justify-self: end;
         width: 90%;
     }
-    
+
     .role-card.worker {
         grid-area: worker;
         justify-self: start;
         width: 90%;
     }
-    
+
     .role-card.admin {
         grid-area: admin;
         justify-self: center;
@@ -1745,7 +1743,7 @@ html {
     .roles-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .role-card.student,
     .role-card.worker,
     .role-card.admin {
@@ -1909,4 +1907,124 @@ html {
     font-size: 0.85rem;
     color: #888;
     margin-top: 0.5rem;
+}
+
+/* Контейнер списка мероприятий */
+#events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+    align-items: center;
+}
+
+.event-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    width: 80%;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.event-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1.4rem;
+}
+
+.event-card p {
+    margin: 8px 0;
+    color: #555;
+    line-height: 1.5;
+}
+
+.event-card strong {
+    color: #222;
+}
+
+.event-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.event-actions button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.join-btn {
+    max-width: 300px;
+    background-color: #3498db;
+    color: white;
+}
+
+.leave-btn {
+    max-width: 300px;
+    background-color: #ff2727;
+    color: white;
+}
+
+.toggle-participants-btn {
+    max-width: 300px;
+}
+
+.join-btn:hover {
+    background-color: #2563eb;
+}
+
+.join-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.participants-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.participants-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.participants-list {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.participants-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.participants-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    color: #444;
+}
+
+.participants-list li:last-child {
+    border-bottom: none;
 }

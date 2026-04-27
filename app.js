@@ -359,6 +359,75 @@ app.put('/product/update/:productId', upload.single('image'), async (req, res) =
     res.json({ status: 'ok' });
 });
 
+app.get('/events', authMiddleware, async (req, res) => {
+    const query = `
+            SELECT 
+                e.id, 
+                e.title, 
+                e.description, 
+                e.event_date, 
+                e.location,
+                COALESCE(
+                    json_agg(
+                        json_build_object('id', u.id, 'name', u.name) 
+                        ORDER BY u.name
+                    ) FILTER (WHERE u.id IS NOT NULL), 
+                    '[]'::json
+                ) as participants
+            FROM events e
+            LEFT JOIN event_participants ep ON e.id = ep.event_id
+            LEFT JOIN users u ON ep.user_id = u.id
+            GROUP BY e.id
+            ORDER BY e.event_date ASC
+        `;
+
+    const { rows } = await db.query(query);
+
+    res.json(rows);
+});
+
+app.post('/events', authMiddleware, async (req, res) => {
+    const { title, description, event_date, location } = req.body;
+
+    const query = `
+            INSERT INTO events (title, description, event_date, location)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *
+        `;
+    const values = [title, description, event_date, location];
+    const { rows } = await db.query(query, values);
+
+    res.json({ status: 'ok' });
+});
+
+app.post('/events/:id/join', authMiddleware, async (req, res) => {
+    const eventId = req.params.id;
+    const userId = req.user.id;
+    const query = `
+            INSERT INTO event_participants (event_id, user_id)
+            VALUES ($1, $2)
+            ON CONFLICT (event_id, user_id) DO NOTHING
+            RETURNING *
+        `;
+    const { rows } = await db.query(query, [eventId, userId]);
+
+    res.json({ status: 'ok' });
+});
+
+app.delete('/events/:id/leave', authMiddleware, async (req, res) => {
+    const eventId = req.params.id;
+    const userId = req.user.id;
+
+    const query = `
+            DELETE FROM event_participants
+            WHERE event_id = $1 AND user_id = $2
+            RETURNING *
+        `;
+    const { rows } = await db.query(query, [eventId, userId]);
+
+    res.json({ status: 'ok' });
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);

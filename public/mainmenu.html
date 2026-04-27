@@ -23,6 +23,7 @@
                 <button class="tabBtn" data-tab="laundry">Стирка</button>
                 <button class="tabBtn" data-tab="shifts">Ремонт</button>
                 <button class="tabBtn" data-tab="sales">Продажи</button>
+                <button class="tabBtn" data-tab="events">Мероприятия</button>
             </nav>
             <section id="announcements" class="tab active"></section>
             <section id="laundry" class="tab hidden">
@@ -37,7 +38,8 @@
             </section>
             <section id="sales" class="tab hidden">
                 <div class="sales-container">
-                    <div class="sales-header">
+                    <div class="header">
+                        <h3>Продажи</h3>
                         <button id="toggleAddProduct" class="toggle-form-btn">+ Добавить товар</button>
                     </div>
                     <div id="productModal" class="modal-overlay hidden">
@@ -117,6 +119,50 @@
                     </div>
                 </div>
             </section>
+            <section id="events" class="tab hidden"></section>
+            <div id="eventModal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <form id="event-form" class="product-form">
+                        <div class="form-header">
+                            <h4>Новое мероприятие</h4>
+                            <span class="close-modal">&times;</span>
+                        </div>
+
+                        <label class="form-label">
+                            <span>Название *</span>
+                            <input
+                                type="text"
+                                name="title"
+                                id="evt-title"
+                                required
+                                placeholder="Например: Вечер настольных игр"
+                            />
+                        </label>
+
+                        <label class="form-label">
+                            <span>Описание</span>
+                            <textarea name="description" rows="3" placeholder="Подробности мероприятия..."></textarea>
+                        </label>
+
+                        <label class="form-label">
+                            <span>Дата и время *</span>
+                            <input type="datetime-local" name="event_date" id="evt-date" required />
+                        </label>
+
+                        <label class="form-label">
+                            <span>Место проведения</span>
+                            <input
+                                type="text"
+                                name="location"
+                                id="evt-loc"
+                                placeholder="Например: Актовый зал, 3 этаж"
+                            />
+                        </label>
+
+                        <button type="submit" class="form-btn">Создать мероприятие</button>
+                    </form>
+                </div>
+            </div>
         </main>
 
         <script type="module" src="js/mainmenu.js"></script>

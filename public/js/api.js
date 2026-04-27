@@ -212,3 +212,49 @@ export async function updateRepairStatus(bookingId, newStatus) {
     });
     return handleResponse(res);
 }
+
+export async function getEvents() {
+    const path = '/events';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+    });
+    return handleResponse(res);
+}
+
+export async function createEvent(eventData) {
+    const path = '/events';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(eventData),
+    });
+    return handleResponse(res);
+}
+
+export async function joinEvent(eventId) {
+    const path = `/events/${eventId}/join`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+    });
+    return handleResponse(res);
+}
+
+export async function leaveEvent(eventId) {
+    const path = `/events/${eventId}/leave`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+    });
+    return handleResponse(res);
+}

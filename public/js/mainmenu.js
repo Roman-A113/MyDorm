@@ -4,6 +4,7 @@ import { renderShifts } from './repairs.js';
 import { renderNotification } from './utils.js';
 import { getCurrentUser } from './api.js';
 import { renderSales } from './sales.js';
+import { renderEvents } from './events.js';
 
 function initLogout() {
     document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -38,6 +39,7 @@ async function loadMainMenu() {
         await renderLaundry();
         await renderShifts();
         await renderSales();
+        await renderEvents();
     } catch (error) {
         console.log(error);
         renderNotification('Ошибка загрузки дашборда: ' + error.message);
