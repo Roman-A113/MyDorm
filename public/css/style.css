@@ -1706,8 +1706,52 @@ html {
 
 .roles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Широкий экран — треугольником */
+@media (min-width: 768px) {
+    .roles-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-areas:
+            "student worker"
+            "admin admin";
+    }
+    
+    .role-card.student {
+        grid-area: student;
+        justify-self: end;
+        width: 90%;
+    }
+    
+    .role-card.worker {
+        grid-area: worker;
+        justify-self: start;
+        width: 90%;
+    }
+    
+    .role-card.admin {
+        grid-area: admin;
+        justify-self: center;
+        width: 50%;
+        min-width: 300px;
+    }
+}
+
+/* Узкий экран — в столбик */
+@media (max-width: 767px) {
+    .roles-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .role-card.student,
+    .role-card.worker,
+    .role-card.admin {
+        width: 100%;
+        justify-self: stretch;
+    }
 }
 
 .role-card {
@@ -1726,22 +1770,25 @@ html {
 /* Цветовая кодировка ролей */
 .role-card.student {
     border-color: #3498db;
-} /* Синий */
+}
 .role-card.worker {
     border-color: #f39c12;
-} /* Оранжевый */
+}
 .role-card.admin {
     border-color: #9b59b6;
-} /* Фиолетовый */
+}
 
+/* Отступы между заголовком и списком */
 .card-header h3 {
     margin-top: 0;
+    margin-bottom: 0;
     font-size: 1.5rem;
 }
 
 .feature-list {
     list-style: none;
     padding: 0;
+    margin-top: 1rem;
 }
 
 .feature-list li {
@@ -1757,7 +1804,6 @@ html {
     color: #27ae60;
     font-weight: bold;
 }
-
 /* Benefits Section */
 .benefits-section {
     background: #f9f9f9;
