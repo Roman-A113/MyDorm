@@ -22,7 +22,7 @@ body {
         Helvetica,
         Arial,
         sans-serif;
-    background: rgb(255, 255, 255);
+    background: linear-gradient(to top, #d3b9f7, #fcfbfd);
     line-height: 1.5;
     min-height: 100vh;
     margin: 0;
@@ -77,7 +77,7 @@ body {
 }
 
 .btn:hover {
-    background: var(--accent-dark);
+    background: #2563eb;
 }
 
 .btn-cancel {
@@ -130,9 +130,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 90vh;
     padding: 1rem;
-    background: white;
 }
 
 .auth-card {
@@ -172,9 +170,11 @@ body {
 
 .tabs {
     width: 100%;
-    margin: 0 auto;
+    margin: 10px auto;
     display: flex;
     gap: 0.5rem;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
     flex-wrap: wrap;
     padding: 0.8rem 1rem;
     background: #fff;
@@ -1661,7 +1661,6 @@ html {
     width: 100%;
 }
 
-/* Hero Section */
 .hero {
     text-align: center;
     padding: 4rem 1rem;
@@ -1972,7 +1971,7 @@ html {
 
 .join-btn {
     max-width: 300px;
-    background-color: #3498db;
+    background-color: #3b82f6;
     color: white;
 }
 

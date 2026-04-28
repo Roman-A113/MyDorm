@@ -7,21 +7,19 @@
         <link rel="stylesheet" href="css/style.css" />
     </head>
 
-    <body>
-        <main class="auth-page">
-            <div class="auth-card">
-                <h2>Войти</h2>
-                <form id="loginForm">
-                    <label>Почта<input type="email" name="email" required /></label>
-                    <label>Пароль<input type="password" name="password" required minlength="6" /></label>
-                    <button type="submit">Войти</button>
-                </form>
-                <hr />
-                <div class="auth-footer">
-                    <p>Еще нет аккаунта? <a href="registration.html">Зарегистрироваться</a></p>
-                </div>
+    <body class="auth-page">
+        <div class="auth-card">
+            <h2>Войти</h2>
+            <form id="loginForm">
+                <label>Почта<input type="email" name="email" required /></label>
+                <label>Пароль<input type="password" name="password" required minlength="6" /></label>
+                <button type="submit">Войти</button>
+            </form>
+            <hr />
+            <div class="auth-footer">
+                <p>Еще нет аккаунта? <a href="registration.html">Зарегистрироваться</a></p>
             </div>
-        </main>
+        </div>
 
         <script type="module" src="js/login.js"></script>
     </body>

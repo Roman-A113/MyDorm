@@ -7,22 +7,19 @@
         <link rel="stylesheet" href="css/style.css" />
     </head>
 
-    <body>
-        <main class="auth-page">
-            <div class="auth-card">
-                <h2>Регистрация</h2>
-                <form id="registerForm">
-                    <label>ФИО<input type="text" name="name" required /></label>
-                    <label>Почта<input type="email" name="email" required /></label>
-                    <label>Пароль<input type="password" name="password" required minlength="6" /></label>
-                    <button type="submit">Зарегистрироваться</button>
-                </form>
-                <div class="auth-footer">
-                    <p>Уже есть аккаунт? <a href="login.html">Войти</a></p>
-                </div>
+    <body class="auth-page">
+        <div class="auth-card">
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                <label>ФИО<input type="text" name="name" required /></label>
+                <label>Почта<input type="email" name="email" required /></label>
+                <label>Пароль<input type="password" name="password" required minlength="6" /></label>
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+            <div class="auth-footer">
+                <p>Уже есть аккаунт? <a href="login.html">Войти</a></p>
             </div>
-        </main>
-
-        <script type="module" src="js/registration.js"></script>
+        </div>
     </body>
+    <script type="module" src="js/registration.js"></script>
 </html>
