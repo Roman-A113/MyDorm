@@ -163,23 +163,37 @@ export async function renderEvents() {
             <h2> Мероприятия</h2 >
             <button id="create-event-btn" class="toggle-form-btn">+ Создать мероприятие</button>
         </div>
-        <div id="events-list"></div>`;
+        <h3>Мои мероприятия:</h3>
+        <div id="my-events-list" class="events-list"></div>
+        <h3>Другие мероприятия:</h3>
+        <div id="other-events-list" class="events-list"></div>`;
 
     document.getElementById('create-event-btn').addEventListener('click', showCreateEventModal);
-
-    const listContainer = document.getElementById('events-list');
+    const myListContainer = document.getElementById('my-events-list');
+    const otherlistContainer = document.getElementById('other-events-list');
 
     const events = await getEvents();
     const currentUserId = window.currentUser.id;
+    const myEvents = events.filter((e) => e.creator_id === currentUserId);
+    const otherEvents = events.filter((e) => e.creator_id !== window.currentUser.id);
 
-    if (events.length === 0) {
-        listContainer.innerHTML = '<p>Пока нет запланированных мероприятий.</p>';
+    if (myEvents.length === 0) {
+        myListContainer.innerHTML = '<div class="empty-message">Вы пока не создали мероприятий</div>';
     }
 
-    events.forEach((event) => {
+    if (otherEvents.length === 0) {
+        otherlistContainer.innerHTML = '<div class="empty-message">Пока нет запланированных мероприятий</div>';
+    }
+
+    myEvents.forEach((event) => {
         const isParticipant = event.participants.some((p) => p.id === currentUserId);
         const isCreator = event.creator_id === currentUserId;
-        renderEventCard(event, listContainer, isParticipant, isCreator);
+        renderEventCard(event, myListContainer, true, true);
+    });
+
+    otherEvents.forEach((event) => {
+        const isParticipant = event.participants.some((p) => p.id === currentUserId);
+        renderEventCard(event, otherlistContainer, isParticipant, false);
     });
 
     setupCardEventListeners();
