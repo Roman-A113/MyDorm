@@ -224,16 +224,16 @@ export async function getEvents() {
     return handleResponse(res);
 }
 
-export async function createEvent(eventData) {
+export async function createEvent(payload) {
     const path = '/events';
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify(eventData),
+        body: payload,
     });
+
     return handleResponse(res);
 }
 

@@ -48,12 +48,9 @@ function setupModalEventListeners() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const title = document.getElementById('evt-title').value;
-        const description = form.querySelector('[name="description"]').value;
-        const event_date = document.getElementById('evt-date').value;
-        const location = document.getElementById('evt-loc').value;
+        const fd = new FormData(form);
 
-        const { id } = await createEvent({ title, description, event_date, location });
+        const { id } = await createEvent(fd);
         await joinEvent(id);
         renderNotification('Мероприятие создано', 'success');
         closeEventModal();
@@ -135,6 +132,7 @@ function renderEventCard(event, listContainer, isParticipant, isCreator) {
         }
 
         <h3>${escapeHtml(event.title)}</h3>
+        <img class="event-image" alt="" src="${event.image_url}">
         <p><strong>Дата:</strong> ${formatDate(event.event_date)}</p>
         ${event.location ? `<p><strong>Место проведения:</strong> ${escapeHtml(event.location)}</p>` : ''}
         <p>${escapeHtml(event.description || '')}</p>

@@ -1928,6 +1928,7 @@ html {
         transform 0.2s ease,
         box-shadow 0.2s ease;
     width: 80%;
+    font-size: 1.2em;
 }
 
 .event-card:hover {
@@ -2050,4 +2051,10 @@ html {
 
 .participants-list li:last-child {
     border-bottom: none;
+}
+
+.event-image {
+    width: 70%;
+    display: block;
+    margin: 0 auto;
 }

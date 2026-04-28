@@ -368,6 +368,7 @@ app.get('/events', authMiddleware, async (req, res) => {
                 e.event_date, 
                 e.location,
                 e.creator_id,
+                e.image_url,
                 COALESCE(
                     json_agg(
                         json_build_object('id', u.id, 'name', u.name) 
@@ -387,16 +388,17 @@ app.get('/events', authMiddleware, async (req, res) => {
     res.json(rows);
 });
 
-app.post('/events', authMiddleware, async (req, res) => {
+app.post('/events', authMiddleware, upload.single('image'), async (req, res) => {
     const { title, description, event_date, location } = req.body;
     const creator_id = req.user.id;
+    const image_url = req.file ? req.file.path : null;
 
     const query = `
-            INSERT INTO events (title, description, event_date, location, creator_id)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO events (title, description, event_date, location, creator_id, image_url)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `;
-    const values = [title, description, event_date, location, creator_id];
+    const values = [title, description, event_date, location, creator_id, image_url];
     const { rows } = await db.query(query, values);
     const event = rows[0];
     res.json({ id: event.id });
