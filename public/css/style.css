@@ -1918,6 +1918,7 @@ html {
 }
 
 .event-card {
+    position: relative;
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 16px;
@@ -1949,6 +1950,29 @@ html {
 
 .event-card strong {
     color: #222;
+}
+
+.delete-event-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    line-height: 0;
+}
+
+.delete-event-btn img {
+    width: 20px;
+    height: 20px;
+    display: block;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.delete-event-btn:hover img {
+    opacity: 1;
 }
 
 .event-actions {

@@ -1,4 +1,4 @@
-import { getEvents, createEvent, joinEvent, leaveEvent } from './api.js';
+import { getEvents, createEvent, joinEvent, leaveEvent, deleteEvent } from './api.js';
 import { renderNotification } from './utils.js';
 
 function escapeHtml(text) {
@@ -33,6 +33,10 @@ function closeEventModal() {
 let isModalInitialized = false;
 function setupModalEventListeners() {
     if (isModalInitialized) return;
+
+    const closeBtn = document.querySelector('#eventModal .close-modal');
+    closeBtn.addEventListener('click', closeEventModal);
+
     const modal = document.getElementById('eventModal');
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -49,7 +53,8 @@ function setupModalEventListeners() {
         const event_date = document.getElementById('evt-date').value;
         const location = document.getElementById('evt-loc').value;
 
-        await createEvent({ title, description, event_date, location });
+        const { id } = await createEvent({ title, description, event_date, location });
+        await joinEvent(id);
         renderNotification('Мероприятие создано', 'success');
         closeEventModal();
         renderEvents();
@@ -57,7 +62,19 @@ function setupModalEventListeners() {
     isModalInitialized = true;
 }
 
-function setupEventListeners() {
+function setupCardEventListeners() {
+    document.querySelectorAll('.delete-event-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+            if (confirm('Вы действительно хотите удалить мероприятие?')) {
+                const button = e.target.closest('.delete-event-btn');
+                const eventId = parseInt(button.dataset.id);
+                await deleteEvent(eventId);
+                renderNotification('Мероприятие удалено', 'success');
+                renderEvents();
+            }
+        });
+    });
+
     document.querySelectorAll('.join-btn').forEach((btn) => {
         btn.addEventListener('click', async (e) => {
             const eventId = parseInt(e.target.dataset.id);
@@ -93,12 +110,9 @@ function setupEventListeners() {
 
     const createBtn = document.getElementById('create-event-btn');
     createBtn.addEventListener('click', showCreateEventModal);
-
-    const closeBtn = document.querySelector('#eventModal .close-modal');
-    closeBtn.addEventListener('click', closeEventModal);
 }
 
-function renderEvent(event, listContainer, isParticipant) {
+function renderEventCard(event, listContainer, isParticipant, isCreator) {
     const card = document.createElement('div');
     card.className = 'event-card';
 
@@ -111,13 +125,22 @@ function renderEvent(event, listContainer, isParticipant) {
     const btnClass = isParticipant ? 'leave-btn' : 'join-btn';
 
     card.innerHTML = `
+        ${
+            isCreator
+                ? `
+            <button class="delete-event-btn" data-id="${event.id}" title="Удалить мероприятие">
+                <img src="${'/images/delete-193.png'}" alt="Удалить" />
+            </button>`
+                : ''
+        }
+
         <h3>${escapeHtml(event.title)}</h3>
         <p><strong>Дата:</strong> ${formatDate(event.event_date)}</p>
-        ${event.location ? `<p><strong>Место:</strong> ${escapeHtml(event.location)}</p>` : ''}
+        ${event.location ? `<p><strong>Место проведения:</strong> ${escapeHtml(event.location)}</p>` : ''}
         <p>${escapeHtml(event.description || '')}</p>
         
         <div class="event-actions">
-            <button class="${btnClass}" data-id="${event.id}">${btnText}</button>
+            ${isCreator ? '' : `<button class="${btnClass}" data-id="${event.id}">${btnText}</button>`}
             <button class="toggle-participants-btn" data-id="${event.id}">
                 Показать участников (${event.participants.length})
             </button>
@@ -155,8 +178,9 @@ export async function renderEvents() {
 
     events.forEach((event) => {
         const isParticipant = event.participants.some((p) => p.id === currentUserId);
-        renderEvent(event, listContainer, isParticipant);
+        const isCreator = event.creator_id === currentUserId;
+        renderEventCard(event, listContainer, isParticipant, isCreator);
     });
 
-    setupEventListeners();
+    setupCardEventListeners();
 }

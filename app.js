@@ -367,6 +367,7 @@ app.get('/events', authMiddleware, async (req, res) => {
                 e.description, 
                 e.event_date, 
                 e.location,
+                e.creator_id,
                 COALESCE(
                     json_agg(
                         json_build_object('id', u.id, 'name', u.name) 
@@ -388,15 +389,24 @@ app.get('/events', authMiddleware, async (req, res) => {
 
 app.post('/events', authMiddleware, async (req, res) => {
     const { title, description, event_date, location } = req.body;
+    const creator_id = req.user.id;
 
     const query = `
-            INSERT INTO events (title, description, event_date, location)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO events (title, description, event_date, location, creator_id)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *
         `;
-    const values = [title, description, event_date, location];
+    const values = [title, description, event_date, location, creator_id];
     const { rows } = await db.query(query, values);
+    const event = rows[0];
+    res.json({ id: event.id });
+});
 
+app.delete('/events/delete/:id', authMiddleware, async (req, res) => {
+    const eventId = req.params.id;
+    const userId = req.user.id;
+    await db.query(`DELETE FROM event_participants WHERE event_id = $1`, [eventId]);
+    await db.query(`DELETE FROM events WHERE id = $1 AND creator_id = $2`, [eventId, userId]);
     res.json({ status: 'ok' });
 });
 

@@ -237,6 +237,17 @@ export async function createEvent(eventData) {
     return handleResponse(res);
 }
 
+export async function deleteEvent(eventId) {
+    const path = `/events/delete/${eventId}`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+    });
+    return handleResponse(res);
+}
+
 export async function joinEvent(eventId) {
     const path = `/events/${eventId}/join`;
     const res = await fetch(`${API_BASE}${path}`, {
