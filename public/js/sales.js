@@ -224,8 +224,8 @@ function renderSaleCard(p) {
     return `
         <article class="sales-card" data-id="${escapeHtml(p.id)}">
             <div class="sales-card-body">
-                <h3 class="sales-card-title">${escapeHtml(p.title)}</h3>
-                <img class="sales-card-media" alt="${escapeHtml(p.title)}" src="${p.image || 'pupupu.png'}">
+                <h5 class="sales-card-title">${escapeHtml(p.title)}</h5>
+                <img class="sales-card-media" alt="${escapeHtml(p.title)}" src="${p.image || 'pupupu.png'}" loading="lazy">
                 <p class="sales-card-description">${escapeHtml(p.description)}</p>
                 <p class="sales-price">${escapeHtml(p.price)} ₽</p>
                 <p class="sales-stock">${escapeHtml(p.stock)} шт</p>
@@ -248,7 +248,7 @@ export async function renderSales() {
 
     panel.innerHTML += `
         <div id="products-grid-wrapper">
-            <h3>Мои товары:</h3>
+            <h4>Мои товары:</h4>
             <div id="products-grid-my" class="sales-grid">
                 ${
                     currentUserProducts.length > 0
@@ -256,7 +256,7 @@ export async function renderSales() {
                         : '<div class="empty-message">У вас нет опубликованных товаров</div>'
                 }
             </div>
-            <h3>Продается:</h3>
+            <h4>Продается:</h4>
             <div id="products-grid-other" class="sales-grid">
                 ${
                     otherUserProducts.length > 0

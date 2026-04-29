@@ -131,8 +131,8 @@ function renderEventCard(event, listContainer, isParticipant, isCreator) {
                 : ''
         }
 
-        <h3>${escapeHtml(event.title)}</h3>
-        <img class="event-image" alt="" src="${event.image_url}">
+        <h5>${escapeHtml(event.title)}</h5>
+        <img class="event-image" alt="" src="${event.image_url}" loading="lazy" style="max-width:100%; height:auto;">
         <p><strong>Дата:</strong> ${formatDate(event.event_date)}</p>
         ${event.location ? `<p><strong>Место проведения:</strong> ${escapeHtml(event.location)}</p>` : ''}
         <p>${escapeHtml(event.description || '')}</p>
@@ -157,14 +157,14 @@ export async function renderEvents() {
 
     const panel = document.getElementById('events');
     panel.innerHTML = `
-        <div class="header">
-            <h2> Мероприятия</h2 >
-            <button id="create-event-btn" class="toggle-form-btn">+ Создать мероприятие</button>
-        </div>
-        <h3>Мои мероприятия:</h3>
-        <div id="my-events-list" class="events-list"></div>
-        <h3>Другие мероприятия:</h3>
-        <div id="other-events-list" class="events-list"></div>`;
+    <div class="header">
+        <h3>Мероприятия</h3>
+        <button id="create-event-btn" class="toggle-form-btn">+ Создать мероприятие</button>
+    </div>
+    <h4>Мои мероприятия</h4>
+    <div id="my-events-list" class="events-list"></div>
+    <h4>Другие мероприятия</h4>
+    <div id="other-events-list" class="events-list"></div>`;
 
     document.getElementById('create-event-btn').addEventListener('click', showCreateEventModal);
     const myListContainer = document.getElementById('my-events-list');
