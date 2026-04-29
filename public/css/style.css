@@ -2088,8 +2088,6 @@ html {
 }
 
 
-/* === БАЗОВЫЕ СТИЛИ (ДЕСКТОП) === */
-/* Заголовки разделов */
 #events .header h3,
 .sales-container .header h3 {
     font-size: 1.5rem;
@@ -2097,7 +2095,6 @@ html {
     color: #111827;
 }
 
-/* Подзаголовки: "Мои товары", "Мои мероприятия" и т.д. */
 #events h4,
 .sales-container h4 {
     font-size: 1.25rem;
@@ -2106,7 +2103,6 @@ html {
     margin: 1.5rem 0 1rem;
 }
 
-/* Названия карточек мероприятий (в JS используется h5) */
 #events .event-card h5 {
     font-size: 1.15rem;
     font-weight: 600;
@@ -2115,7 +2111,6 @@ html {
     line-height: 1.3;
 }
 
-/* Заголовки карточек товаров */
 .sales-card-title {
     font-size: 1.1rem;
     font-weight: 600;
@@ -2123,10 +2118,18 @@ html {
     margin-bottom: 0.5rem;
 }
 
-/* Текст карточек */
 #events .event-card {
     font-size: 1rem;
     line-height: 1.5;
+    width: 80%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.sales-card {
+    width: 100%;
+    max-width: 280px;
+    box-sizing: border-box;
 }
 
 .sales-card-description,
@@ -2140,14 +2143,24 @@ html {
     line-height: 1.5;
 }
 
-/* === АДАПТИВ (ПЛАНШЕТЫ ≤768px) === */
+.sales-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    justify-items: center;
+}
+
+.events-list {
+    gap: 20px;
+    padding: 20px 0;
+    align-items: center;
+}
+
 @media (max-width: 768px) {
     #events .header h3,
     .sales-container .header h3 { font-size: 1.3rem; }
-
     #events h4,
     .sales-container h4 { font-size: 1.1rem; margin: 1.2rem 0 0.8rem; }
-
     #events .event-card h5 { font-size: 1.05rem; }
     .sales-card-title { font-size: 1rem; }
 
@@ -2161,7 +2174,16 @@ html {
     .sales-card-description { font-size: 0.9rem; }
     .sales-price { font-size: 1.05rem; }
 
-    .events-list, .sales-grid { gap: 12px; }
+    .sales-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .sales-card {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .events-list { gap: 12px; }
     #events .event-actions { flex-direction: column; gap: 8px; }
     #events .event-actions button,
     #events .join-btn, #events .leave-btn, #events .toggle-participants-btn,
@@ -2169,7 +2191,6 @@ html {
     .sales-btn-wrapper { flex-direction: column; gap: 8px; }
 }
 
-/* === АДАПТИВ (ТЕЛЕФОНЫ ≤480px) === */
 @media (max-width: 480px) {
     #events .header h3,
     .sales-container .header h3 { font-size: 1.2rem; }
@@ -2186,4 +2207,15 @@ html {
     #events .event-actions button,
     #events .join-btn, #events .leave-btn, #events .toggle-participants-btn,
     .sales-btn { font-size: 0.85rem; padding: 9px 10px; }
+
+    .sales-card,
+    .event-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+    }
+    .sales-grid,
+    .events-list {
+        gap: 10px;
+    }
 }
