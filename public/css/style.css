@@ -196,11 +196,28 @@ body {
 
 .mainmenu-content {
     width: 70%;
-    max-width: 1200px;
     margin: 10px auto;
     box-sizing: border-box;
     flex: 1;
     overflow: hidden;
+}
+
+@media (max-width: 750px) {
+    .mainmenu-content {
+        width: 100%;
+    }
+
+    .event-card {
+        width: 90% !important;
+    }
+
+    .event-image {
+        width: 90% !important;
+    }
+
+    .sales-grid {
+        justify-content: center;
+    }
 }
 
 .mainmenu-content .tab {
@@ -865,29 +882,28 @@ body {
 }
 
 @media (max-width: 768px) {
-
     .topbar-box {
         padding: 0.75rem 1rem;
         flex-wrap: wrap; /* Позволяет элементам переноситься */
-        gap: 0.75rem;    /* Отступ между заголовком и кнопками */
+        gap: 0.75rem; /* Отступ между заголовком и кнопками */
     }
 
     .topbar h1 {
         font-size: 1.1rem;
-        flex: 1 1 100%;  /* Заголовок на всю ширину */
+        flex: 1 1 100%; /* Заголовок на всю ширину */
         text-align: center;
     }
 
     .topbar .actions {
         display: flex;
-        gap: 0.5rem;     /* Отступ между кнопками */
+        gap: 0.5rem; /* Отступ между кнопками */
         width: 100%;
         justify-content: center; /* Кнопки по центру, не прижаты к краю */
         flex-wrap: wrap;
     }
 
     .topbar .btn {
-        flex: 0 0 auto;   /* Кнопки не растягиваются */
+        flex: 0 0 auto; /* Кнопки не растягиваются */
         padding: 0.5rem 0.9rem;
         font-size: 0.9rem;
         white-space: nowrap;
@@ -955,6 +971,10 @@ body {
 
     .btn-sm {
         width: 100%;
+    }
+
+    .header {
+        flex-direction: column;
     }
 }
 
@@ -1418,8 +1438,7 @@ html {
     display: flex;
     flex-direction: column;
 
-    width: 280px;
-    max-width: 280px;
+    max-width: 300px;
 
     transition:
         transform 0.2s,
@@ -1956,7 +1975,6 @@ html {
         transform 0.2s ease,
         box-shadow 0.2s ease;
     width: 80%;
-    font-size: 1.2em;
 }
 
 .event-card:hover {
@@ -1975,6 +1993,7 @@ html {
     margin: 8px 0;
     color: #555;
     line-height: 1.5;
+    overflow-wrap: break-word;
 }
 
 .event-card strong {
@@ -2087,7 +2106,6 @@ html {
     margin: 0 auto;
 }
 
-
 #events .header h3,
 .sales-container .header h3 {
     font-size: 1.5rem;
@@ -2109,6 +2127,8 @@ html {
     color: #1f2937;
     margin: 0 0 0.5rem;
     line-height: 1.3;
+    overflow-wrap: break-word;
+    width: 80%;
 }
 
 .sales-card-title {
@@ -2116,20 +2136,6 @@ html {
     font-weight: 600;
     color: #111827;
     margin-bottom: 0.5rem;
-}
-
-#events .event-card {
-    font-size: 1rem;
-    line-height: 1.5;
-    width: 80%;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.sales-card {
-    width: 100%;
-    max-width: 280px;
-    box-sizing: border-box;
 }
 
 .sales-card-description,
@@ -2143,13 +2149,6 @@ html {
     line-height: 1.5;
 }
 
-.sales-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    padding: 0;
-    justify-items: center;
-}
-
 .events-list {
     gap: 20px;
     padding: 20px 0;
@@ -2158,62 +2157,87 @@ html {
 
 @media (max-width: 768px) {
     #events .header h3,
-    .sales-container .header h3 { font-size: 1.3rem; }
-    #events h4,
-    .sales-container h4 { font-size: 1.1rem; margin: 1.2rem 0 0.8rem; }
-    #events .event-card h5 { font-size: 1.05rem; }
-    .sales-card-title { font-size: 1rem; }
-
-    #events .event-card {
-        width: 100%;
-        max-width: 100%;
-        padding: 14px;
-        font-size: 0.95rem;
+    .sales-container .header h3 {
+        font-size: 1.3rem;
     }
-    #events .event-card p, #events .event-card strong { font-size: 0.9rem; }
-    .sales-card-description { font-size: 0.9rem; }
-    .sales-price { font-size: 1.05rem; }
+    #events h4,
+    .sales-container h4 {
+        font-size: 1.1rem;
+        margin: 1.2rem 0 0.8rem;
+    }
+    #events .event-card h5 {
+        font-size: 1.05rem;
+    }
+    .sales-card-title {
+        font-size: 1rem;
+    }
 
-    .sales-grid {
-        grid-template-columns: 1fr;
+    #events .event-card p,
+    #events .event-card strong {
+        font-size: 0.9rem;
+    }
+    .sales-card-description {
+        font-size: 0.9rem;
+    }
+    .sales-price {
+        font-size: 1.05rem;
+    }
+
+    .events-list {
         gap: 12px;
     }
-    .sales-card {
-        max-width: 100%;
-        width: 100%;
+    #events .event-actions {
+        flex-direction: column;
+        gap: 8px;
     }
-
-    .events-list { gap: 12px; }
-    #events .event-actions { flex-direction: column; gap: 8px; }
     #events .event-actions button,
-    #events .join-btn, #events .leave-btn, #events .toggle-participants-btn,
-    .sales-btn { width: 100%; font-size: 0.9rem; padding: 10px 12px; }
-    .sales-btn-wrapper { flex-direction: column; gap: 8px; }
+    #events .join-btn,
+    #events .leave-btn,
+    #events .toggle-participants-btn,
+    .sales-btn {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 10px 12px;
+    }
 }
 
 @media (max-width: 480px) {
     #events .header h3,
-    .sales-container .header h3 { font-size: 1.2rem; }
+    .sales-container .header h3 {
+        font-size: 1.2rem;
+    }
     #events h4,
-    .sales-container h4 { font-size: 1rem; }
-    #events .event-card h5 { font-size: 0.95rem; }
-    .sales-card-title { font-size: 0.95rem; }
+    .sales-container h4 {
+        font-size: 1rem;
+    }
+    #events .event-card h5 {
+        font-size: 0.95rem;
+    }
+    .sales-card-title {
+        font-size: 0.95rem;
+    }
 
-    #events .event-card { padding: 12px; font-size: 0.9rem; }
-    #events .event-card p, #events .event-card strong { font-size: 0.85rem; }
-    .sales-card-description { font-size: 0.85rem; }
-    .sales-price { font-size: 1rem; }
+    #events .event-card p,
+    #events .event-card strong {
+        font-size: 0.85rem;
+    }
+    .sales-card-description {
+        font-size: 0.85rem;
+    }
+    .sales-price {
+        font-size: 1rem;
+    }
 
     #events .event-actions button,
-    #events .join-btn, #events .leave-btn, #events .toggle-participants-btn,
-    .sales-btn { font-size: 0.85rem; padding: 9px 10px; }
+    #events .join-btn,
+    #events .leave-btn,
+    #events .toggle-participants-btn,
+    .sales-btn {
+        font-size: 0.85rem;
+        padding: 9px 10px;
+    }
 
     .sales-card,
-    .event-card {
-        width: 100%;
-        max-width: 100%;
-        padding: 12px;
-    }
     .sales-grid,
     .events-list {
         gap: 10px;
