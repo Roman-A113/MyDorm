@@ -865,6 +865,34 @@ body {
 }
 
 @media (max-width: 768px) {
+
+    .topbar-box {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap; /* Позволяет элементам переноситься */
+        gap: 0.75rem;    /* Отступ между заголовком и кнопками */
+    }
+
+    .topbar h1 {
+        font-size: 1.1rem;
+        flex: 1 1 100%;  /* Заголовок на всю ширину */
+        text-align: center;
+    }
+
+    .topbar .actions {
+        display: flex;
+        gap: 0.5rem;     /* Отступ между кнопками */
+        width: 100%;
+        justify-content: center; /* Кнопки по центру, не прижаты к краю */
+        flex-wrap: wrap;
+    }
+
+    .topbar .btn {
+        flex: 0 0 auto;   /* Кнопки не растягиваются */
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
     .calendar-table th,
     .calendar-table td {
         padding: 10px 12px;
