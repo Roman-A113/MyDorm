@@ -78,11 +78,13 @@ async function handleCancelBooking(selectedMachineId, selectedDate, bookingId, t
     renderSlotsList(selectedMachineId, selectedDate);
 }
 
-async function handleBookingSubmit(selectedMachineId, selectedDate) {
+async function handleBookingSubmit(selectedMachineId, selectedDate, btn) {
     const slotsArray = Array.from(selectedSlots).sort();
 
+    btn.disabled = true;
     await bookLaundry(selectedMachineId, selectedDate, slotsArray);
     renderNotification('Слоты успешно забронированы', 'success');
+    btn.disabled = false;
 
     allLaundryBookings = await getAllLaundryBookings();
     selectedSlots.clear();
@@ -139,7 +141,7 @@ function renderSlotsList(selectedMachineId, dateStr) {
     btn.id = 'book-btn';
     btn.textContent = 'Забронировать выбранные слоты';
     btn.style.display = 'none';
-    btn.onclick = () => handleBookingSubmit(selectedMachineId, dateStr);
+    btn.onclick = () => handleBookingSubmit(selectedMachineId, dateStr, btn);
     container.appendChild(btn);
 }
 

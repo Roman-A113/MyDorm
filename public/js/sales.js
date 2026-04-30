@@ -130,13 +130,16 @@ function initEventListeners(panel, products) {
     });
 
     const productForm = document.getElementById('product-form');
+    const submitBtn = productForm.querySelector('#btn-create-product');
     productForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         if (!validateForm()) return;
         const fd = new FormData(productForm);
 
+        submitBtn.disabled = true;
         await addProduct(fd);
+        submitBtn.disabled = false;
         closeAddProductModal();
         renderNotification('Товар опубликован!', 'success');
         renderSales();
@@ -149,7 +152,9 @@ function initEventListeners(panel, products) {
         if (!validateForm()) return;
         const fd = new FormData(productForm);
 
+        btnUpdate.disabled = true;
         await updateProduct(productId, fd);
+        btnUpdate.disabled = false;
         renderNotification('Изменения сохранены', 'success');
         closeAddProductModal();
         renderSales();
@@ -225,7 +230,7 @@ function renderSaleCard(p) {
         <article class="sales-card" data-id="${escapeHtml(p.id)}">
             <div class="sales-card-body">
                 <h5 class="sales-card-title">${escapeHtml(p.title)}</h5>
-                <img class="sales-card-media" alt="${escapeHtml(p.title)}" src="${p.image || 'pupupu.png'}" loading="lazy">
+                <img class="sales-card-media" alt="" src="${p.image || 'pupupu.png'}">
                 <p class="sales-card-description">${escapeHtml(p.description)}</p>
                 <p class="sales-price">${escapeHtml(p.price)} ₽</p>
                 <p class="sales-stock">${escapeHtml(p.stock)} шт</p>

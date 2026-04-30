@@ -45,13 +45,16 @@ function setupModalEventListeners() {
     });
 
     const form = document.getElementById('event-form');
+    const submitBtn = document.querySelector('#event-submit-btn');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const fd = new FormData(form);
 
+        submitBtn.disabled = true;
         const { id } = await createEvent(fd);
         await joinEvent(id);
+        submitBtn.disabled = false;
         renderNotification('Мероприятие создано', 'success');
         closeEventModal();
         renderEvents();
