@@ -150,17 +150,18 @@ app.get('/repair-calendar', authMiddleware, async (req, res) => {
 
     const query = `
         SELECT specialization, 
-            slot_date::TEXT as slot_date, 
+            slot_date::TEXT as slot_date_text, 
             time_block, 
             JSON_AGG(JSON_BUILD_OBJECT('id', id, 'user_id', student_id, 'status', status, 'problem_description', problem_description)) AS slot_bookings
         FROM repair_bookings
-        GROUP BY specialization, slot_date, time_block
+        WHERE slot_date >= (CURRENT_DATE AT TIME ZONE 'Asia/Yekaterinburg')::DATE
+        GROUP BY specialization, slot_date_text, time_block
     `;
     const rows = await db.query(query);
 
     rows.rows.forEach((row) => {
-        const { specialization, slot_date, time_block, slot_bookings } = row;
-        bookings[specialization][slot_date][time_block] = slot_bookings;
+        const { specialization, slot_date_text, time_block, slot_bookings } = row;
+        bookings[specialization][slot_date_text][time_block] = slot_bookings;
     });
 
     res.json(bookings);
@@ -233,6 +234,7 @@ app.get('/laundry/all-data', authMiddleware, async (req, res) => {
                    user_id, 
                    id as booking_id
             FROM laundry_bookings
+            WHERE booking_date >= (CURRENT_DATE AT TIME ZONE 'Asia/Yekaterinburg')::DATE
         `;
     const { rows } = await db.query(query);
 

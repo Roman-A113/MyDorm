@@ -161,9 +161,9 @@ export async function renderEvents() {
         <h3>Мероприятия</h3>
         <button id="create-event-btn" class="toggle-form-btn">+ Создать мероприятие</button>
     </div>
-    <h4>Мои мероприятия</h4>
+    <h4>Мои мероприятия:</h4>
     <div id="my-events-list" class="events-list"></div>
-    <h4>Другие мероприятия</h4>
+    <h4>Другие мероприятия:</h4>
     <div id="other-events-list" class="events-list"></div>`;
 
     document.getElementById('create-event-btn').addEventListener('click', showCreateEventModal);
