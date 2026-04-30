@@ -132,7 +132,7 @@ function renderEventCard(event, listContainer, isParticipant, isCreator) {
         }
 
         <h5>${escapeHtml(event.title)}</h5>
-        <img class="event-image" alt="" src="${event.image_url}" loading="lazy" style="max-width:100%; height:auto;">
+        <img class="event-image" alt="" src="${event.image_url}">
         <p><strong>Дата:</strong> ${formatDate(event.event_date)}</p>
         ${event.location ? `<p><strong>Место проведения:</strong> ${escapeHtml(event.location)}</p>` : ''}
         <p>${escapeHtml(event.description || '')}</p>

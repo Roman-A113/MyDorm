@@ -5,7 +5,7 @@ export async function renderAnnouncements() {
     const panel = document.getElementById('announcements');
     const announcements = await getAnnouncements();
 
-    let html = '<h3>Объявления</h3>';
+    let html = '';
 
     if (window.currentUser?.role === 'admin') {
         html += `
@@ -24,7 +24,7 @@ export async function renderAnnouncements() {
         .map((a) => `<li><b>${a.title}</b> – ${a.body} <span class="muted">(${a.published_at})</span></li>`)
         .join('')}</ul>`;
 
-    panel.innerHTML = html;
+    panel.innerHTML += html;
 
     if (window.currentUser?.role === 'admin') {
         const form = document.getElementById('noticeCreateForm');
