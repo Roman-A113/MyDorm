@@ -34,9 +34,33 @@ const upload = multer({ storage: storage });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 function generateToken(user) {
-    return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
+    return jwt.sign({ id: user.id, role: user.role, name: user.name, email: user.email }, JWT_SECRET, {
         expiresIn: '8h',
     });
+}
+
+const ACTION_TYPES = {
+    REGISTER: 'REGISTER',
+    LOGIN: 'LOGIN',
+    REPAIR_BOOK: 'REPAIR_BOOK',
+    REPAIR_CANCEL: 'REPAIR_CANCEL',
+    REPAIR_STATUS_CHANGE: 'REPAIR_STATUS_CHANGE',
+    LAUNDRY_BOOK: 'LAUNDRY_BOOK',
+    LAUNDRY_CANCEL: 'LAUNDRY_CANCEL',
+    PRODUCT_ADD: 'PRODUCT_ADD',
+    PRODUCT_DELETE: 'PRODUCT_DELETE',
+    PRODUCT_EDIT: 'PRODUCT_EDIT',
+    EVENT_CREATE: 'EVENT_CREATE',
+    EVENT_DELETE: 'EVENT_DELETE',
+    EVENT_JOIN: 'EVENT_JOIN',
+    EVENT_LEAVE: 'EVENT_LEAVE',
+};
+
+async function addLog(userId, name, email, action, details = null) {
+    await db.query(
+        'INSERT INTO activity_logs(user_id, name, email, action, details, created_at) VALUES($1, $2, $3, $4, $5, NOW())',
+        [userId, name, email, action, details],
+    );
 }
 
 app.post('/auth/register', async (req, res) => {
@@ -52,6 +76,8 @@ app.post('/auth/register', async (req, res) => {
         [name, email, hash, role, room || null],
     );
     const token = generateToken(result.rows[0]);
+
+    await addLog(result.rows[0].id, name, email, ACTION_TYPES.REGISTER);
     res.json({ token, user: result.rows[0] });
 });
 
@@ -65,6 +91,9 @@ app.post('/auth/login', async (req, res) => {
     if (!ok) return res.status(401).send('Неверный пароль');
 
     const token = generateToken(user);
+
+    await addLog(user.id, user.name, user.email, ACTION_TYPES.LOGIN);
+
     res.json({
         token,
         user: {
@@ -184,6 +213,13 @@ app.post('/repairs/book', authMiddleware, async (req, res) => {
         [slot_date, time_block, req.user.id, specialization, problem_description],
     );
 
+    await addLog(
+        req.user.id,
+        req.user.name,
+        req.user.email,
+        ACTION_TYPES.REPAIR_BOOK,
+        `${slot_date}, ${time_block}, ${specialization}, ${problem_description}`,
+    );
     res.json(null);
 });
 
@@ -197,6 +233,8 @@ app.delete('/repairs/bookings/:id', authMiddleware, async (req, res) => {
         `,
         [bookingId],
     );
+
+    await addLog(req.user.id, req.user.name, req.user.email, ACTION_TYPES.REPAIR_CANCEL);
 
     res.json({ status: 'ok' });
 });
@@ -214,6 +252,13 @@ app.post('/laundry/book', authMiddleware, async (req, res) => {
                 RETURNING id, time_slot
             `;
         const result = await db.query(insertQuery, [machine_id, date, timeSlot, userId]);
+        await addLog(
+            req.user.id,
+            req.user.name,
+            req.user.email,
+            ACTION_TYPES.LAUNDRY_BOOK,
+            `${machine_id}, ${date}, ${timeSlot}`,
+        );
         insertedBookings.push(result.rows[0]);
     }
 
@@ -223,6 +268,7 @@ app.post('/laundry/book', authMiddleware, async (req, res) => {
 app.delete('/laundry/cancel/:id', authMiddleware, async (req, res) => {
     const bookingId = req.params.id;
     await db.query('DELETE FROM laundry_bookings WHERE id = $1', [bookingId]);
+    await addLog(req.user.id, req.user.name, req.user.email, ACTION_TYPES.LAUNDRY_CANCEL);
     res.json(null);
 });
 
@@ -280,7 +326,13 @@ app.patch('/repairs/status/:id', authMiddleware, async (req, res) => {
     }
 
     await db.query('UPDATE repair_bookings SET status = $1 WHERE id = $2', [status, bookingId]);
-
+    await addLog(
+        req.user.id,
+        req.user.name,
+        req.user.email,
+        ACTION_TYPES.REPAIR_STATUS_CHANGE,
+        `${status}, bookingId=${bookingId}`,
+    );
     res.json(null);
 });
 
@@ -320,16 +372,25 @@ app.post('/products/add', authMiddleware, upload.single('image'), async (req, re
     ];
 
     const { rows } = await db.query(query, values);
+
+    await addLog(
+        req.user.id,
+        req.user.name,
+        req.user.email,
+        ACTION_TYPES.PRODUCT_ADD,
+        `title=${title}, description=${description}, price=${price}, stock=${stock}, imagePath=${imagePath}, seller_contact=${seller_contact} ${seller_contact_telegram}`,
+    );
     res.status(201).json(rows[0]);
 });
 
 app.delete('/products/delete/:productId', authMiddleware, async (req, res) => {
     const productId = req.params.productId;
     await db.query(`DELETE FROM sales WHERE id = $1;`, [productId]);
+    await addLog(req.user.id, req.user.name, req.user.email, ACTION_TYPES.PRODUCT_DELETE);
     res.json({ status: 'ok' });
 });
 
-app.put('/product/update/:productId', upload.single('image'), async (req, res) => {
+app.put('/product/update/:productId', authMiddleware, upload.single('image'), async (req, res) => {
     const productId = req.params.productId;
     const { title, description, price, stock, seller_contact, seller_contact_telegram } = req.body;
     const newImagePath = req.file ? req.file.path : null;
@@ -356,6 +417,14 @@ app.put('/product/update/:productId', upload.single('image'), async (req, res) =
                  image_url = $7 
              WHERE id = $8`,
         [title, description, price, stock, seller_contact, seller_contact_telegram, finalImagePath, productId],
+    );
+
+    await addLog(
+        req.user.id,
+        req.user.name,
+        req.user.email,
+        ACTION_TYPES.PRODUCT_EDIT,
+        `title=${title}, description=${description}, price=${price}, stock=${stock}, imagePath=${finalImagePath}, seller_contact=${seller_contact} ${seller_contact_telegram}`,
     );
 
     res.json({ status: 'ok' });
@@ -402,6 +471,15 @@ app.post('/events', authMiddleware, upload.single('image'), async (req, res) => 
         `;
     const values = [title, description, event_date, location, creator_id, image_url];
     const { rows } = await db.query(query, values);
+
+    await addLog(
+        req.user.id,
+        req.user.name,
+        req.user.email,
+        ACTION_TYPES.EVENT_CREATE,
+        `title=${title}, description=${description}, event_date=${event_date}, location=${location}, imagePath=${image_url}`,
+    );
+
     const event = rows[0];
     res.json({ id: event.id });
 });
@@ -411,6 +489,8 @@ app.delete('/events/delete/:id', authMiddleware, async (req, res) => {
     const userId = req.user.id;
     await db.query(`DELETE FROM event_participants WHERE event_id = $1`, [eventId]);
     await db.query(`DELETE FROM events WHERE id = $1 AND creator_id = $2`, [eventId, userId]);
+
+    await addLog(req.user.id, req.user.name, req.user.email, ACTION_TYPES.EVENT_DELETE);
     res.json({ status: 'ok' });
 });
 
@@ -425,6 +505,8 @@ app.post('/events/:id/join', authMiddleware, async (req, res) => {
         `;
     const { rows } = await db.query(query, [eventId, userId]);
 
+    await addLog(req.user.id, req.user.name, req.user.email, ACTION_TYPES.EVENT_JOIN, `${eventId}`);
+
     res.json({ status: 'ok' });
 });
 
@@ -438,6 +520,17 @@ app.delete('/events/:id/leave', authMiddleware, async (req, res) => {
             RETURNING *
         `;
     const { rows } = await db.query(query, [eventId, userId]);
+
+    await addLog(req.user.id, req.user.name, req.user.email, ACTION_TYPES.EVENT_LEAVE, `${eventId}`);
+
+    res.json({ status: 'ok' });
+});
+
+app.post('/logs', authMiddleware, async (req, res) => {
+    const { name, action, details } = req.body;
+    const userId = req.user.id;
+
+    await db.query('INSERT INTO activity_logs VALUES($1, $2, $3, $4, NOW())', userId, name, action, details);
 
     res.json({ status: 'ok' });
 });

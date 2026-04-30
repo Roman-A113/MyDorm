@@ -104,6 +104,9 @@ export async function updateProduct(productId, formData) {
     const path = `/product/update/${productId}`;
     const res = await fetch(`${API_BASE}${path}`, {
         method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
         body: formData,
     });
 
