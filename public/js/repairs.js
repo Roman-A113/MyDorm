@@ -146,16 +146,19 @@ function openBookingModal(date, block) {
         if (e.target === modal) close();
     };
 
+    const submitBtn = modal.querySelector('.btn.btn-primary');
     modal.querySelector('#bookForm').onsubmit = async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         try {
+            submitBtn.disabled = true;
             await bookRepair({
                 slot_date: date,
                 time_block: block,
                 specialization: specialist,
                 problem_description: fd.get('problem_description'),
             });
+            submitBtn.disabled = false;
             renderNotification('Заявка отправлена!', 'success');
             close();
             const currentSpecialist = document.getElementById('specialist-select').value;
