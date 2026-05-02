@@ -63,6 +63,32 @@ export async function getAnnouncements() {
     return handleResponse(res);
 }
 
+export async function createAnnouncement(payload) {
+    const path = '/announcements';
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return handleResponse(res);
+}
+
+export async function deleteAnnouncement(announcementId) {
+    const path = `/announcements/delete/${announcementId}`;
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+    });
+
+    return handleResponse(res);
+}
+
 export async function getProducts() {
     const path = '/products';
     const res = await fetch(`${API_BASE}${path}`, {
@@ -108,20 +134,6 @@ export async function updateProduct(productId, formData) {
             Authorization: `Bearer ${getToken()}`,
         },
         body: formData,
-    });
-
-    return handleResponse(res);
-}
-
-export async function createAnnouncement(payload) {
-    const path = '/announcements';
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify(payload),
     });
 
     return handleResponse(res);

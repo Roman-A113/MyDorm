@@ -1249,8 +1249,8 @@ html {
 }
 
 #book-btn {
+    max-width: 100%;
     margin-top: 15px;
-    width: 100%;
     padding: 12px;
     background-color: #4caf50;
     color: white;
@@ -1258,6 +1258,7 @@ html {
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
+    margin: 0 auto;
     transition: background 0.2s;
 }
 
@@ -1898,6 +1899,7 @@ html {
 }
 
 #announcements li {
+    position: relative;
     margin-bottom: 1rem;
     padding: 1rem;
     background: #f9f9f9;
@@ -2114,7 +2116,7 @@ html {
     line-height: 1.5;
 }
 
-media (max-width: 768px) {
+@media (max-width: 768px) {
     #events .header h3,
     .sales-container .header h3 {
         font-size: 1.3rem;
@@ -2205,4 +2207,39 @@ media (max-width: 768px) {
 
 .participants-list li {
     padding: 5px;
+}
+
+.delete-announcement-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    line-height: 0;
+}
+
+.delete-announcement-btn img {
+    width: 20px;
+    height: 20px;
+    display: block;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.delete-announcement-btn:hover img {
+    opacity: 1;
+}
+
+.announcement b {
+    display: block;
+    width: 90%;
+    overflow-wrap: break-word;
+}
+
+#create-announcement-btn {
+    max-width: 100%;
+    margin: 0 auto;
+    overflow-wrap: break-word;
 }

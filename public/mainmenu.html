@@ -27,6 +27,15 @@
             </nav>
             <section id="announcements" class="tab active">
                 <h3>Объявления</h3>
+                <div class="panel-card" style="display: none">
+                    <h4>Создать объявление</h4>
+                    <form id="noticeCreateForm" class="simple-form">
+                        <label>Заголовок:<input name="title" required /></label>
+                        <label>Текст:<textarea name="body" required></textarea></label>
+                        <button type="submit" class="btn" id="create-announcement-btn">Опубликовать объявление</button>
+                    </form>
+                </div>
+                <div class="announcements-wrapper"></div>
             </section>
             <section id="laundry" class="tab hidden">
                 <div class="filter">

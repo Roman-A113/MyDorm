@@ -1,32 +1,58 @@
-import { getAnnouncements, createAnnouncement } from './api.js';
+import { getAnnouncements, createAnnouncement, deleteAnnouncement } from './api.js';
 import { renderNotification } from './utils.js';
+
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString('ru-RU', options);
+}
+
+function setupAnnouncementEventListeners() {
+    document.querySelectorAll('.delete-announcement-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+            if (confirm()) {
+                let announcementId = btn.dataset.id;
+                await deleteAnnouncement(announcementId);
+                renderNotification('объявление удалено', 'success');
+                renderAnnouncements();
+            }
+        });
+    });
+}
+
+let isInitialized = false;
 
 export async function renderAnnouncements() {
     const panel = document.getElementById('announcements');
+    const panelCard = document.querySelector('.panel-card');
+    const wrapper = document.querySelector('.announcements-wrapper');
+    wrapper.innerHTML = '';
     const announcements = await getAnnouncements();
 
-    let html = '';
-
     if (window.currentUser?.role === 'admin') {
-        html += `
-        <div class="panel-card">
-            <h4>Создать объявление</h4>
-            <form id="noticeCreateForm" class="simple-form">
-            <label>Заголовок:<input name="title" required></label>
-            <label>Текст:<textarea name="body" required></textarea></label>
-            <button type="submit" class="btn">Опубликовать объявление</button>
-            </form>
-        </div>
-        `;
+        panelCard.style.display = 'block';
     }
 
-    html += `<ul>${announcements
-        .map((a) => `<li><b>${a.title}</b> – ${a.body} <span class="muted">(${a.published_at})</span></li>`)
+    wrapper.innerHTML = `<ul>${announcements
+        .map(
+            (a) =>
+                `<li class="announcement">
+                    ${`${
+                        window.currentUser?.role === 'admin'
+                            ? `<button class="delete-announcement-btn" data-id="${a.id}" title="Удалить объявление">
+                            <img src="/images/delete-193.png" alt="Удалить">
+                        </button>`
+                            : ''
+                    }`}
+                    <b>${a.title}</b> – ${a.body} 
+                    <span class="muted">${formatDate(a.published_at)}</span>
+                </li>`,
+        )
         .join('')}</ul>`;
 
-    panel.innerHTML += html;
+    setupAnnouncementEventListeners();
 
-    if (window.currentUser?.role === 'admin') {
+    if (window.currentUser?.role === 'admin' && !isInitialized) {
+        isInitialized = true;
         const form = document.getElementById('noticeCreateForm');
         form.addEventListener('submit', async (event) => {
             event.preventDefault();

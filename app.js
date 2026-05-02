@@ -155,6 +155,12 @@ app.post('/announcements', authMiddleware, async (req, res) => {
     res.json(rows[0]);
 });
 
+app.delete('/announcements/delete/:id', authMiddleware, async (req, res) => {
+    const id = req.params.id;
+    await db.query('DELETE FROM announcements WHERE id = $1', [id]);
+    res.json({ status: 'ok' });
+});
+
 const {
     generateCalendarDays,
     LAUNDRY_TIME_SLOTS,
