@@ -1,8 +1,9 @@
 import { renderNotification } from './utils.js';
-import { register } from './api.js';
+import { register, login } from './api.js';
 
 const registerForm = document.getElementById('registerForm');
 
+const registerButton = registerForm.querySelector('button');
 registerForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const fd = new FormData(registerForm);
@@ -14,9 +15,13 @@ registerForm.addEventListener('submit', async (event) => {
     };
 
     try {
+        registerButton.disabled = true;
         await register(payload);
         registerForm.reset();
-        window.location.href = 'login.html';
+        const result = await login(payload.email, payload.password);
+        localStorage.setItem('token', result.token);
+        window.location.href = 'mainmenu.html';
+        registerButton.disabled = false;
     } catch (error) {
         console.log(error);
         renderNotification(error.message);
