@@ -85,6 +85,10 @@ function renderTimeSlot(day, time, slotBookings) {
                     <span class="status-badge status-${myBooking.status}">${getStatusLabel(myBooking.status)}</span>
                 </div>
                 <p class="problem-text">${myBooking.problem_description}</p>
+                <div class="booking-info">
+                    <p>Номер комнаты:</p>
+                    <span class="room-number">${myBooking.room_number}</span>
+                </div>
                 ${
                     myBooking.status === 'pending'
                         ? `<button class="btn btn-sm btn-cancel" data-booking-id="${myBooking.id}">Отменить запись</button>`
@@ -131,6 +135,9 @@ function openBookingModal(date, block) {
                 <label>Проблема:
                     <textarea name="problem_description" required placeholder="Опишите проблему..."></textarea>
                 </label>
+                <label>Номер комнаты:
+                    <input type="number" name="room_number" required placeholder="100" min="0" max="999"></input>
+                </label>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel modal-close">Отмена</button>
                     <button type="submit" class="btn btn-primary">Записаться</button>
@@ -157,6 +164,7 @@ function openBookingModal(date, block) {
                 time_block: block,
                 specialization: specialist,
                 problem_description: fd.get('problem_description'),
+                room_number: fd.get('room_number'),
             });
             submitBtn.disabled = false;
             renderNotification('Заявка отправлена!', 'success');
@@ -291,6 +299,10 @@ function renderRequestSlot(req) {
                     <div class="req-body">
                         <p><strong>Студент ID:</strong> ${req.user_id}</p>
                         <p class="problem-text">"${req.problem_description}"</p>
+                    </div>
+                    <div class="booking-info">
+                        <p>Номер комнаты:</p>
+                        <span class="room-number">${req.room_number}</span>
                     </div>
                     <div class="req-actions">
                         ${renderWorkerActionButtons(req)}

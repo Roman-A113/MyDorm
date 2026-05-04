@@ -2239,3 +2239,14 @@ html {
     margin: 0 auto;
     overflow-wrap: break-word;
 }
+
+.booking-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.booking-info p {
+    margin: 0;
+}

@@ -187,7 +187,7 @@ app.get('/repair-calendar', authMiddleware, async (req, res) => {
         SELECT specialization, 
             slot_date::TEXT as slot_date_text, 
             time_block, 
-            JSON_AGG(JSON_BUILD_OBJECT('id', id, 'user_id', student_id, 'status', status, 'problem_description', problem_description)) AS slot_bookings
+            JSON_AGG(JSON_BUILD_OBJECT('id', id, 'user_id', student_id, 'status', status, 'problem_description', problem_description, 'room_number', room)) AS slot_bookings
         FROM repair_bookings
         WHERE slot_date >= (CURRENT_DATE AT TIME ZONE 'Asia/Yekaterinburg')::DATE
         GROUP BY specialization, slot_date_text, time_block
@@ -203,7 +203,7 @@ app.get('/repair-calendar', authMiddleware, async (req, res) => {
 });
 
 app.post('/repairs/book', authMiddleware, async (req, res) => {
-    const { slot_date, time_block, specialization, problem_description } = req.body;
+    const { slot_date, time_block, specialization, problem_description, room_number } = req.body;
 
     await db.query(
         `
@@ -213,10 +213,11 @@ app.post('/repairs/book', authMiddleware, async (req, res) => {
                 student_id,
                 specialization,
                 problem_description,
-                status
-            ) VALUES ($1, $2, $3, $4, $5, 'pending')
+                status,
+                room
+            ) VALUES ($1, $2, $3, $4, $5, 'pending', $6)
         `,
-        [slot_date, time_block, req.user.id, specialization, problem_description],
+        [slot_date, time_block, req.user.id, specialization, problem_description, room_number],
     );
 
     await addLog(
