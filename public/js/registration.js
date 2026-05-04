@@ -21,9 +21,13 @@ registerForm.addEventListener('submit', async (event) => {
         const result = await login(payload.email, payload.password);
         localStorage.setItem('token', result.token);
         window.location.href = 'mainmenu.html';
-        registerButton.disabled = false;
     } catch (error) {
+        registerButton.disabled = false;
         console.log(error);
         renderNotification(error.message);
     }
+});
+
+window.addEventListener('pageshow', (e) => {
+    registerButton.disabled = false;
 });

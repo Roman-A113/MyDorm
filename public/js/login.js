@@ -14,9 +14,13 @@ loginForm.addEventListener('submit', async (event) => {
         const result = await login(email, password);
         localStorage.setItem('token', result.token);
         window.location.href = 'mainmenu.html';
-        loginButton.disabled = false;
     } catch (error) {
+        loginButton.disabled = false;
         console.log(error);
         renderNotification(error.message);
     }
+});
+
+window.addEventListener('pageshow', (e) => {
+    loginButton.disabled = false;
 });

@@ -751,7 +751,6 @@ body {
     color: #1e293b;
     font-size: 20px;
     font-weight: 600;
-    padding-bottom: 16px;
     border-bottom: 1px solid #e2e8f0;
 }
 
@@ -1250,7 +1249,6 @@ html {
 
 #book-btn {
     max-width: 100%;
-    margin-top: 15px;
     padding: 12px;
     background-color: #4caf50;
     color: white;
@@ -1258,7 +1256,7 @@ html {
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
-    margin: 0 auto;
+    margin: 15px auto;
     transition: background 0.2s;
 }
 
@@ -2085,7 +2083,6 @@ html {
     font-size: 1.25rem;
     font-weight: 600;
     color: #374151;
-    margin: 1.5rem 0 1rem;
 }
 
 #events .event-card h5 {
@@ -2124,7 +2121,6 @@ html {
     #events h4,
     .sales-container h4 {
         font-size: 1.1rem;
-        margin: 1.2rem 0 0.8rem;
     }
     #events .event-card h5 {
         font-size: 1.05rem;
