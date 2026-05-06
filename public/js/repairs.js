@@ -297,7 +297,7 @@ function renderRequestSlot(req) {
                 <span class="req-status">${getStatusLabel(req.status)}</span>
                 </div>
                     <div class="req-body">
-                        <p><strong>Студент ID:</strong> ${req.user_id}</p>
+                        <p><strong>Студент:</strong> ${req.name}</p>
                         <p class="problem-text">"${req.problem_description}"</p>
                     </div>
                     <div class="booking-info">
