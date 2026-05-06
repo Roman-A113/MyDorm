@@ -44,6 +44,10 @@ function getLaundryDayStatus(machineId, dateStr, allLaundryBookings) {
 }
 
 function toggleSlotSelection(btn, slot) {
+    if (selectedSlots.size === 4) {
+        renderNotification('Вы не можете забронировать более 4 слотов', 'error');
+        return;
+    }
     btn.classList.toggle('selected');
 
     if (btn.classList.contains('selected')) {

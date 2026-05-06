@@ -1,6 +1,7 @@
 import { renderAnnouncements } from './announcements.js';
 import { renderLaundry } from './laundry.js';
 import { renderShifts } from './repairs.js';
+import { renderAdminOverview } from './adminOverview.js';
 import { renderNotification } from './utils.js';
 import { getCurrentUser } from './api.js';
 import { renderSales } from './sales.js';
@@ -35,16 +36,33 @@ async function loadMainMenu() {
         window.currentUser = profile;
         document.querySelector('.topbar h1').textContent = `${profile.name} (${profile.role})`;
 
+        const adminTabBtn = document.querySelector(`.tabBtn[data-tab="admin-overview"]`);
+        if (window.currentUser.role === 'admin') {
+            if (adminTabBtn) adminTabBtn.style.display = 'inline-flex';
+        } else {
+            if (adminTabBtn) adminTabBtn.style.display = 'none';
+        }
+
         if (window.currentUser.role !== 'student' && window.currentUser.role !== 'admin') {
             document.querySelector(`.tabBtn[data-tab="laundry"]`).style.display = 'none';
             document.querySelector(`.tabBtn[data-tab="events"]`).style.display = 'none';
             document.querySelector(`.tabBtn[data-tab="sales"]`).style.display = 'none';
         }
+
+        if (window.currentUser.role == 'admin') {
+            document.querySelector(`.tabBtn[data-tab="laundry"]`).style.display = 'none';
+            document.querySelector(`.tabBtn[data-tab="shifts"]`).style.display = 'none';
+            document.querySelector(`.tabBtn[data-tab="sales"]`).style.display = 'none';
+        }
+
         await renderAnnouncements();
         await renderLaundry();
         await renderShifts();
         await renderSales();
         await renderEvents();
+        if (window.currentUser.role === 'admin') {
+            await renderAdminOverview();
+        }
     } catch (error) {
         console.log(error);
         renderNotification('Ошибка загрузки дашборда: ' + error.message);

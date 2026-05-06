@@ -323,6 +323,42 @@ body {
     border-bottom: none;
 }
 
+.admin-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.admin-actions-bar h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.section-card {
+    background: var(--card);
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.admin-table-wrapper {
+    overflow-x: auto;
+}
+
+.admin-details summary {
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.75rem 0;
+}
+
+.empty-state {
+    padding: 1rem;
+    color: #5a5f6d;
+}
+
 .muted {
     color: var(--muted);
     font-size: 0.9rem;

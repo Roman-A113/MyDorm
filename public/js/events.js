@@ -173,6 +173,14 @@ export async function renderEvents() {
     const myListContainer = document.getElementById('my-events-list');
     const otherlistContainer = document.getElementById('other-events-list');
 
+    if (window.currentUser.role === 'admin') {
+        myListContainer.style.display = 'none';
+        document.querySelectorAll('h4').forEach((el) => {
+            el.style.display = 'none';
+        });
+        document.querySelector('#create-event-btn').style.display = 'none';
+    }
+
     const events = await getEvents();
     const currentUserId = window.currentUser.id;
     const myEvents = events.filter((e) => e.creator_id === currentUserId);

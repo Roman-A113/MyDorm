@@ -255,11 +255,11 @@ app.post('/laundry/book', authMiddleware, async (req, res) => {
 
     for (const timeSlot of slots) {
         const insertQuery = `
-                INSERT INTO laundry_bookings (machine_id, booking_date, time_slot, user_id)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO laundry_bookings (machine_id, booking_date, time_slot, user_id, name)
+                VALUES ($1, $2, $3, $4, $5)
                 RETURNING id, time_slot
             `;
-        const result = await db.query(insertQuery, [machine_id, date, timeSlot, userId]);
+        const result = await db.query(insertQuery, [machine_id, date, timeSlot, userId, req.user.name]);
         await addLog(
             req.user.id,
             req.user.name,
@@ -285,7 +285,8 @@ app.get('/laundry/all-data', authMiddleware, async (req, res) => {
             SELECT machine_id, 
                    booking_date::TEXT as date, 
                    time_slot, 
-                   user_id, 
+                   user_id,
+                   name, 
                    id as booking_id
             FROM laundry_bookings
             WHERE booking_date >= (CURRENT_DATE AT TIME ZONE 'Asia/Yekaterinburg')::DATE
@@ -307,11 +308,12 @@ app.get('/laundry/all-data', authMiddleware, async (req, res) => {
     });
 
     rows.forEach((row) => {
-        const { machine_id, date, time_slot, user_id, booking_id } = row;
+        const { machine_id, date, time_slot, user_id, booking_id, name } = row;
 
         allBookings[machine_id][date][time_slot] = {
             userId: user_id,
             bookingId: booking_id,
+            name: name,
         };
     });
 
