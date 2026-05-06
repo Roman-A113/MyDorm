@@ -35,6 +35,11 @@ async function loadMainMenu() {
         window.currentUser = profile;
         document.querySelector('.topbar h1').textContent = `${profile.name} (${profile.role})`;
 
+        if (window.currentUser.role !== 'student' && window.currentUser.role !== 'admin') {
+            document.querySelector(`.tabBtn[data-tab="laundry"]`).style.display = 'none';
+            document.querySelector(`.tabBtn[data-tab="events"]`).style.display = 'none';
+            document.querySelector(`.tabBtn[data-tab="sales"]`).style.display = 'none';
+        }
         await renderAnnouncements();
         await renderLaundry();
         await renderShifts();
