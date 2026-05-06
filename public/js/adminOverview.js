@@ -82,7 +82,7 @@ function renderLaundrySection(laundryData) {
                                 ${slots
                                     .map(
                                         (row) =>
-                                            `<tr><td>${formatDate(row.date)}</td><td>${row.time}</td><td>${row.userId}</td><td>${row.name}</td><td>${row.bookingId}</td></tr>`,
+                                            `<tr><td data-label="Дата">${formatDate(row.date)}</td><td data-label="Слот">${row.time}</td><td data-label="Id">${row.userId}</td><td data-label="Имя">${row.name}</td><td data-label="Номер брони">${row.bookingId}</td></tr>`,
                                     )
                                     .join('')}
                             </tbody>
@@ -155,7 +155,7 @@ function renderRepairSection(repairData) {
                         ${entries
                             .map(
                                 (item) =>
-                                    `<tr><td>${formatDate(item.date)}</td><td>${getSpecialistName(item.specialist)}</td><td>${item.timeBlock}</td><td>${item.studentName}</td><td>${item.room || '-'}</td><td>${getRepairStatusLabel(item.status)}</td><td>${item.problem || '-'}</td></tr>`,
+                                    `<tr><td data-label="Дата">${formatDate(item.date)}</td><td data-label="Специалист">${getSpecialistName(item.specialist)}</td><td data-label="Время">${item.timeBlock}</td><td data-label="Студент">${item.studentName}</td><td data-label="Комната">${item.room || '-'}</td><td data-label="Статус">${getRepairStatusLabel(item.status)}</td><td data-label="Проблема">${item.problem || '-'}</td></tr>`,
                             )
                             .join('')}
                     </tbody>

@@ -14,6 +14,7 @@ const SLOTS_CONTAINER_ID = 'laundry-slots-list';
 
 let allLaundryBookings = {};
 let selectedSlots = new Set();
+let myBookingsCount = 0;
 
 const SLOTS_PER_MACHINE = LAUNDRY_TIME_SLOTS.length;
 
@@ -44,7 +45,7 @@ function getLaundryDayStatus(machineId, dateStr, allLaundryBookings) {
 }
 
 function toggleSlotSelection(btn, slot) {
-    if (selectedSlots.size === 4) {
+    if (!btn.classList.contains('selected') && selectedSlots.size + myBookingsCount >= 4) {
         renderNotification('Вы не можете забронировать более 4 слотов', 'error');
         return;
     }
@@ -98,6 +99,7 @@ async function handleBookingSubmit(selectedMachineId, selectedDate, btn) {
 
 function renderSlotsList(selectedMachineId, dateStr) {
     selectedSlots.clear();
+    myBookingsCount = 0;
     const container = document.getElementById(CALENDAR_CONTAINER_ID);
 
     const oldList = document.getElementById(SLOTS_CONTAINER_ID);
@@ -131,6 +133,7 @@ function renderSlotsList(selectedMachineId, dateStr) {
         } else {
             if (bookingInfo.userId === window.currentUser.id) {
                 btn.classList.add('my-booking');
+                myBookingsCount++;
                 btn.onclick = () => handleCancelBooking(selectedMachineId, dateStr, bookingInfo.bookingId, slot);
             } else {
                 btn.disabled = true;
