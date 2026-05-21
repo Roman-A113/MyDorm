@@ -25,6 +25,7 @@ function closeCreateAnnouncementModal() {
 
 function fillFormWithProductData(announcement) {
     const form = document.getElementById('noticeCreateForm');
+    document.getElementById('announcementsModal').querySelector('h4').textContent = 'Редактировать объявление';
     form.querySelector('[name="title"]').value = announcement.title;
     form.querySelector('[name="body"]').value = announcement.body;
 
@@ -35,15 +36,29 @@ function fillFormWithProductData(announcement) {
     hiddenId.value = announcement.id;
 }
 
+function validateForm(form) {
+    let inputs = form.querySelectorAll('input, textarea');
+    inputs.forEach((input) => {
+        if (typeof input.value === 'string') {
+            input.value = input.value.trim();
+        }
+    });
+}
+
 function setupModalEventListeners() {
-    document.getElementById('toggleAddAnnouncement').addEventListener('click', openCreateAnnouncementModal);
+    document.getElementById('toggleAddAnnouncement').addEventListener('click', () => {
+        document.getElementById('announcementsModal').querySelector('h4').textContent = 'Создать объявление';
+        openCreateAnnouncementModal();
+    });
     document.querySelector('.close-modal-announcements').addEventListener('click', closeCreateAnnouncementModal);
 
     const form = document.getElementById('noticeCreateForm');
     const btnCreate = document.getElementById('create-announcement-btn');
     btnCreate.addEventListener('click', async (event) => {
         event.preventDefault();
+        validateForm(form);
         const fd = new FormData(form);
+
         try {
             await createAnnouncement({
                 title: fd.get('title'),
@@ -62,6 +77,7 @@ function setupModalEventListeners() {
     btnUpdate.addEventListener('click', async (e) => {
         e.preventDefault();
         const announcementId = form.querySelector('input[name="announcement_id"]')?.value;
+        validateForm(form);
         const fd = new FormData(form);
 
         btnUpdate.disabled = true;
@@ -97,6 +113,7 @@ function setupAnnouncementsEventListeners(announcements) {
         btn.addEventListener('click', async (e) => {
             let announcementId = btn.dataset.id;
             const announcement = announcements.find((a) => a.id == announcementId);
+
             fillFormWithProductData(announcement);
             openCreateAnnouncementModal();
         });
