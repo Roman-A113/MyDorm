@@ -32,6 +32,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.set('trust proxy', 1);
 
 function generateToken(user) {
     return jwt.sign({ id: user.id, role: user.role, name: user.name, email: user.email }, JWT_SECRET, {
@@ -546,6 +547,6 @@ app.post('/logs', authMiddleware, async (req, res) => {
 });
 
 const port = process.env.PORT || 3857;
-app.listen(port, () => {
+app.listen(port, '127.0.0.1', () => {
     console.log(`Server listening at http://localhost:${port}`);
 });
