@@ -16,6 +16,17 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('ru-RU', options);
 }
 
+function toLocalDatetimeValue(dateString) {
+    const date = new Date(dateString);
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 16);
+}
+
+function toUtcIsoString(localDatetime) {
+    if (!localDatetime) return '';
+    return new Date(localDatetime).toISOString();
+}
+
 function showCreateEventModal() {
     const modal = document.getElementById('eventModal');
     modal.classList.remove('hidden');
@@ -39,8 +50,7 @@ function fillFormWithEventData(event) {
     form.querySelector('[name="title"]').value = event.title;
     form.querySelector('[name="description"]').value = event.description;
 
-    const d = new Date(new Date(event.event_date).getTime() + 18000000);
-    form.querySelector('[name="event_date"]').value = d.toISOString().slice(0, 16);
+    form.querySelector('[name="event_date"]').value = toLocalDatetimeValue(event.event_date);
 
     form.querySelector('[name="location"]').value = event.location;
     form.querySelector('[name="organizer_contact"]').value = event.organizer_contact;
@@ -76,6 +86,10 @@ function setupModalEventListeners() {
         }
         e.preventDefault();
         const fd = new FormData(form);
+        const eventDateValue = form.querySelector('[name="event_date"]').value;
+        if (eventDateValue) {
+            fd.set('event_date', toUtcIsoString(eventDateValue));
+        }
 
         createBtn.disabled = true;
         const { id } = await createEvent(fd);
@@ -95,6 +109,10 @@ function setupModalEventListeners() {
         e.preventDefault();
         const eventId = form.querySelector('input[name="event_id"]')?.value;
         const fd = new FormData(form);
+        const eventDateValue = form.querySelector('[name="event_date"]').value;
+        if (eventDateValue) {
+            fd.set('event_date', toUtcIsoString(eventDateValue));
+        }
 
         updateBtn.disabled = true;
         await updateEvent(eventId, fd);
