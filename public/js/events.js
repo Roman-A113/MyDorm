@@ -126,7 +126,7 @@ function renderEventCard(event, listContainer, isParticipant, isCreator) {
 
     card.innerHTML = `
         ${
-            isCreator
+            isCreator || window.currentUser.role === 'admin'
                 ? `
             <button class="delete-event-btn" data-id="${event.id}" title="Удалить мероприятие">
                 <img src="${'/images/delete-193.png'}" alt="Удалить" />

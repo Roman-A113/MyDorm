@@ -499,7 +499,7 @@ app.delete('/events/delete/:id', authMiddleware, async (req, res) => {
     const eventId = req.params.id;
     const userId = req.user.id;
     await db.query(`DELETE FROM event_participants WHERE event_id = $1`, [eventId]);
-    await db.query(`DELETE FROM events WHERE id = $1 AND creator_id = $2`, [eventId, userId]);
+    await db.query(`DELETE FROM events WHERE id = $1`, [eventId]);
 
     await addLog(req.user.id, req.user.name, req.user.email, ACTION_TYPES.EVENT_DELETE);
     res.json({ status: 'ok' });
