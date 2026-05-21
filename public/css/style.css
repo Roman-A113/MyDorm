@@ -1689,11 +1689,11 @@ html {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Поверх всего остального */
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
     transition:
@@ -1701,7 +1701,6 @@ html {
         visibility 0.3s ease;
 }
 
-/* Когда модальное окно активно */
 .modal-overlay.active {
     opacity: 1;
     visibility: visible;
@@ -1725,7 +1724,6 @@ html {
     transform: translateY(0);
 }
 
-/* Стили для крестика закрытия */
 .close-modal {
     cursor: pointer;
     font-size: 24px;
@@ -1740,6 +1738,22 @@ html {
 .close-modal:hover {
     color: #000;
 }
+
+.close-modal-announcements {
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    line-height: 1;
+}
+
+.close-modal-announcements:hover {
+    color: #000;
+}
+
 
 .hidden {
     display: none !important;
@@ -2290,6 +2304,29 @@ html {
     padding: 5px;
 }
 
+.edit-announcement-btn {
+    position: absolute;
+    top: 10px;
+    right: 40px;
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    line-height: 0;
+}
+
+.edit-announcement-btn img {
+    width: 20px;
+    height: 20px;
+    display: block;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.edit-announcement-btn:hover img {
+    opacity: 0.8;
+}
+
 .delete-announcement-btn {
     position: absolute;
     top: 10px;
@@ -2315,7 +2352,7 @@ html {
 
 .announcement b {
     display: block;
-    width: 90%;
+    width: 70%;
     overflow-wrap: break-word;
 }
 

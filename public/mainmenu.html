@@ -27,17 +27,34 @@
                 <button class="tabBtn" data-tab="events">Мероприятия</button>
             </nav>
             <section id="announcements" class="tab active">
-                <h3>Объявления</h3>
-                <div class="panel-card" style="display: none">
-                    <h4>Создать объявление</h4>
-                    <form id="noticeCreateForm" class="simple-form">
-                        <label>Заголовок:<input name="title" required /></label>
-                        <label>Текст:<textarea name="body" required></textarea></label>
-                        <button type="submit" class="btn" id="create-announcement-btn">Опубликовать объявление</button>
-                    </form>
+                <div class="header">
+                    <h3>Объявления</h3>
+                    <button id="toggleAddAnnouncement" class="toggle-form-btn" style="display: none">
+                        + Создать объявление
+                    </button>
+                </div>
+                <div id="announcementsModal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="form-header">
+                            <h4>Новое объявление</h4>
+                            <span class="close-modal-announcements">&times;</span>
+                        </div>
+                        <form id="noticeCreateForm" class="simple-form">
+                            <label>Заголовок:<input name="title" required /></label>
+                            <label>Текст:<textarea name="body" required></textarea></label>
+                            <button type="submit" class="btn" id="create-announcement-btn">
+                                Опубликовать объявление
+                            </button>
+                            <button type="submit" class="btn" id="update-announcement-btn" style="display: none">
+                                Сохранить изменения
+                            </button>
+                            <input type="hidden" name="announcement_id" value="" />
+                        </form>
+                    </div>
                 </div>
                 <div class="announcements-wrapper"></div>
             </section>
+
             <section id="laundry" class="tab hidden">
                 <div class="filter">
                     <label for="laundry-select">🧺 Стиральная машинка:</label>

@@ -77,6 +77,21 @@ export async function createAnnouncement(payload) {
     return handleResponse(res);
 }
 
+export async function updateAnnouncement(announcementId, payload) {
+    const path = `/announcements/update/${announcementId}`;
+
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return handleResponse(res);
+}
+
 export async function deleteAnnouncement(announcementId) {
     const path = `/announcements/delete/${announcementId}`;
     const res = await fetch(`${API_BASE}${path}`, {

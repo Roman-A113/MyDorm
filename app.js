@@ -147,13 +147,32 @@ app.get('/announcements', authMiddleware, async (req, res) => {
 
 app.post('/announcements', authMiddleware, async (req, res) => {
     const { title, body } = req.body;
-    if (!title || !body) return res.status(400).json({ error: 'Заполните поля' });
+    if (!title || !body) return res.status(400).send('Заполните поля');
+
+    const role = req.user.role;
+    if (role !== 'admin') {
+        return res.status(400).send('У вас нет прав администратора для создания мероприятий');
+    }
 
     const { rows } = await db.query(
         'INSERT INTO announcements (title, body, author_id, published_at) VALUES ($1,$2,$3,NOW()) RETURNING *',
         [title, body, req.user.id],
     );
     res.json(rows[0]);
+});
+
+app.put('/announcements/update/:id', authMiddleware, async (req, res) => {
+    const id = req.params.id;
+    const { title, body } = req.body;
+    if (!title || !body) return res.status(400).send('Заполните поля');
+
+    const role = req.user.role;
+    if (role !== 'admin') {
+        return res.status(400).send('У вас нет прав администратора для редактирования мероприятий');
+    }
+
+    await db.query('UPDATE announcements SET title = $1, body = $2 WHERE id = $3', [title, body, id]);
+    res.json({ status: 'ok' });
 });
 
 app.delete('/announcements/delete/:id', authMiddleware, async (req, res) => {

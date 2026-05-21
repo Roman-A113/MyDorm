@@ -175,7 +175,7 @@ export async function renderEvents() {
 
     if (window.currentUser.role === 'admin') {
         myListContainer.style.display = 'none';
-        document.querySelectorAll('h4').forEach((el) => {
+        document.getElementById('events').querySelectorAll('h4').forEach((el) => {
             el.style.display = 'none';
         });
         document.querySelector('#create-event-btn').style.display = 'none';
