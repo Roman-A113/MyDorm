@@ -524,6 +524,30 @@ app.delete('/events/delete/:id', authMiddleware, async (req, res) => {
     res.json({ status: 'ok' });
 });
 
+app.put('/events/update/:id', authMiddleware, upload.single('image'), async (req, res) => {
+    const eventId = req.params.id;
+    const userId = req.user.id;
+    const { title, description, event_date, location } = req.body;
+    const image_url = req.file ? req.file.path : null;
+
+    if (!image_url) {
+        await db.query(`UPDATE events SET title = $1, description = $2, event_date = $3, location = $4 WHERE id = $5`, [
+            title,
+            description,
+            event_date,
+            location,
+            eventId,
+        ]);
+    } else {
+        await db.query(
+            `UPDATE events SET title = $1, description = $2, event_date = $3, location = $4, image_url = $5 WHERE id = $6`,
+            [title, description, event_date, location, image_url, eventId],
+        );
+    }
+
+    res.json({ status: 'ok' });
+});
+
 app.post('/events/:id/join', authMiddleware, async (req, res) => {
     const eventId = req.params.id;
     const userId = req.user.id;

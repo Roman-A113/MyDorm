@@ -23,7 +23,7 @@ function closeCreateAnnouncementModal() {
     document.getElementById('update-announcement-btn').style.display = 'none';
 }
 
-function fillFormWithProductData(announcement) {
+function fillFormWithAnnouncementData(announcement) {
     const form = document.getElementById('noticeCreateForm');
     document.getElementById('announcementsModal').querySelector('h4').textContent = 'Редактировать объявление';
     form.querySelector('[name="title"]').value = announcement.title;
@@ -114,7 +114,7 @@ function setupAnnouncementsEventListeners(announcements) {
             let announcementId = btn.dataset.id;
             const announcement = announcements.find((a) => a.id == announcementId);
 
-            fillFormWithProductData(announcement);
+            fillFormWithAnnouncementData(announcement);
             openCreateAnnouncementModal();
         });
     });
@@ -139,7 +139,7 @@ export async function renderAnnouncements() {
                     ? `<button class="delete-announcement-btn" data-id="${a.id}" title="Удалить объявление">
                 <img src="/images/delete-193.png" alt="Удалить">
                 </button>
-                <button class="edit-announcement-btn" data-id="${a.id}" title="Редактировать мероприятие">
+                <button class="edit-announcement-btn" data-id="${a.id}" title="Редактировать объявление">
                 <img src="${'/images/edit_4218.webp'}" alt="Редактировать" />
                 </button>`
                     : ''

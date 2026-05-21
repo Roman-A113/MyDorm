@@ -1,4 +1,4 @@
-import { getEvents, createEvent, joinEvent, leaveEvent, deleteEvent } from './api.js';
+import { getEvents, createEvent, joinEvent, leaveEvent, deleteEvent, updateEvent } from './api.js';
 import { renderNotification } from './utils.js';
 
 function escapeHtml(text) {
@@ -26,8 +26,29 @@ function closeEventModal() {
     const modal = document.getElementById('eventModal');
     const form = document.getElementById('event-form');
 
-    if (modal) modal.classList.add('hidden');
-    if (form) form.reset();
+    document.getElementById('event-create-btn').style.display = 'block';
+    document.getElementById('event-update-btn').style.display = 'none';
+
+    modal.classList.add('hidden');
+    form.reset();
+}
+
+function fillFormWithEventData(event) {
+    const form = document.getElementById('event-form');
+    document.getElementById('eventModal').querySelector('h4').textContent = 'Редактировать мероприятие';
+    form.querySelector('[name="title"]').value = event.title;
+    form.querySelector('[name="description"]').value = event.description;
+
+    const d = new Date(new Date(event.event_date).getTime() + 18000000);
+    form.querySelector('[name="event_date"]').value = d.toISOString().slice(0, 16);
+
+    form.querySelector('[name="location"]').value = event.location;
+
+    document.getElementById('event-create-btn').style.display = 'none';
+    document.getElementById('event-update-btn').style.display = 'block';
+
+    let hiddenId = form.querySelector('input[name="event_id"]');
+    hiddenId.value = event.id;
 }
 
 let isModalInitialized = false;
@@ -45,24 +66,46 @@ function setupModalEventListeners() {
     });
 
     const form = document.getElementById('event-form');
-    const submitBtn = document.querySelector('#event-submit-btn');
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
 
+    const createBtn = document.getElementById('event-create-btn');
+    createBtn.addEventListener('click', async (e) => {
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        e.preventDefault();
         const fd = new FormData(form);
 
-        submitBtn.disabled = true;
+        createBtn.disabled = true;
         const { id } = await createEvent(fd);
         await joinEvent(id);
-        submitBtn.disabled = false;
+        createBtn.disabled = false;
         renderNotification('Мероприятие создано', 'success');
+        closeEventModal();
+        renderEvents();
+    });
+
+    const updateBtn = document.getElementById('event-update-btn');
+    updateBtn.addEventListener('click', async (e) => {
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        e.preventDefault();
+        const eventId = form.querySelector('input[name="event_id"]')?.value;
+        const fd = new FormData(form);
+
+        updateBtn.disabled = true;
+        await updateEvent(eventId, fd);
+        updateBtn.disabled = false;
+        renderNotification('Мероприятие изменено', 'success');
         closeEventModal();
         renderEvents();
     });
     isModalInitialized = true;
 }
 
-function setupCardEventListeners() {
+function setupCardEventListeners(events) {
     document.querySelectorAll('.delete-event-btn').forEach((btn) => {
         btn.addEventListener('click', async (e) => {
             if (confirm('Вы действительно хотите удалить мероприятие?')) {
@@ -72,6 +115,17 @@ function setupCardEventListeners() {
                 renderNotification('Мероприятие удалено', 'success');
                 renderEvents();
             }
+        });
+    });
+
+    document.querySelectorAll('.edit-event-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+            const button = e.target.closest('.edit-event-btn');
+            const eventId = parseInt(button.dataset.id);
+
+            let event = events.find((e) => e.id === eventId);
+            fillFormWithEventData(event);
+            showCreateEventModal();
         });
     });
 
@@ -109,7 +163,10 @@ function setupCardEventListeners() {
     });
 
     const createBtn = document.getElementById('create-event-btn');
-    createBtn.addEventListener('click', showCreateEventModal);
+    createBtn.addEventListener('click', () => {
+        document.getElementById('event-form').querySelector('h4').textContent = 'Создать мероприятие';
+        showCreateEventModal();
+    });
 }
 
 function renderEventCard(event, listContainer, isParticipant, isCreator) {
@@ -133,6 +190,14 @@ function renderEventCard(event, listContainer, isParticipant, isCreator) {
             </button>`
                 : ''
         }
+        ${
+            isCreator
+                ? `<button class="edit-event-btn" data-id="${event.id}" title="Редактировать мероприятие">
+                <img src="${'/images/edit_4218.webp'}" alt="Редактировать" />
+        </button>`
+                : ''
+        }
+        
 
         <h5>${escapeHtml(event.title)}</h5>
         <img class="event-image" alt="" src="${event.image_url}">
@@ -175,9 +240,12 @@ export async function renderEvents() {
 
     if (window.currentUser.role === 'admin') {
         myListContainer.style.display = 'none';
-        document.getElementById('events').querySelectorAll('h4').forEach((el) => {
-            el.style.display = 'none';
-        });
+        document
+            .getElementById('events')
+            .querySelectorAll('h4')
+            .forEach((el) => {
+                el.style.display = 'none';
+            });
         document.querySelector('#create-event-btn').style.display = 'none';
     }
 
@@ -205,5 +273,5 @@ export async function renderEvents() {
         renderEventCard(event, otherlistContainer, isParticipant, false);
     });
 
-    setupCardEventListeners();
+    setupCardEventListeners(events);
 }
