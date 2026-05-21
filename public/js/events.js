@@ -43,6 +43,7 @@ function fillFormWithEventData(event) {
     form.querySelector('[name="event_date"]').value = d.toISOString().slice(0, 16);
 
     form.querySelector('[name="location"]').value = event.location;
+    form.querySelector('[name="organizer_contact"]').value = event.organizer_contact;
 
     document.getElementById('event-create-btn').style.display = 'none';
     document.getElementById('event-update-btn').style.display = 'block';
@@ -102,6 +103,52 @@ function setupModalEventListeners() {
         closeEventModal();
         renderEvents();
     });
+
+    const phoneInput = form.querySelector('#organizer_contact');
+    phoneInput.addEventListener('input', function (e) {
+        let x = e.target.value.replace(/\D/g, '');
+
+        if (!x) {
+            e.target.value = '';
+            return;
+        }
+
+        if (['7', '8', '9'].indexOf(x[0]) > -1) {
+            if (x[0] === '9') x = '7' + x;
+            let firstSymbols = '+7';
+            if (x[0] === '8') firstSymbols = '8';
+
+            let formattedValue = firstSymbols + ' ';
+
+            if (x.length > 1) {
+                formattedValue += '(' + x.substring(1, 4);
+            }
+            if (x.length >= 5) {
+                formattedValue += ') ' + x.substring(4, 7);
+            }
+            if (x.length >= 8) {
+                formattedValue += '-' + x.substring(7, 9);
+            }
+            if (x.length >= 10) {
+                formattedValue += '-' + x.substring(9, 11);
+            }
+
+            e.target.value = formattedValue;
+        } else {
+            e.target.value = '+' + x.substring(0, 15);
+        }
+    });
+
+    phoneInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace') {
+            const val = e.target.value;
+            if (val === '+7 ' || val === '+7' || val === '8 ' || val === '8') {
+                e.target.value = '';
+                e.preventDefault();
+            }
+        }
+    });
+
     isModalInitialized = true;
 }
 
@@ -204,6 +251,7 @@ function renderEventCard(event, listContainer, isParticipant, isCreator) {
         <p><strong>Дата:</strong> ${formatDate(event.event_date)}</p>
         ${event.location ? `<p><strong>Место проведения:</strong> ${escapeHtml(event.location)}</p>` : ''}
         <p>${escapeHtml(event.description || '')}</p>
+        <p><strong>Связь с организатором:</strong> ${escapeHtml(event.organizer_contact)}</p>
         
         <div class="event-actions">
             ${isCreator ? '' : `<button class="${btnClass}" data-id="${event.id}">${btnText}</button>`}

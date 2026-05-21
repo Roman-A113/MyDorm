@@ -470,6 +470,7 @@ app.get('/events', authMiddleware, async (req, res) => {
                 e.location,
                 e.creator_id,
                 e.image_url,
+                e.organizer_contact,
                 COALESCE(
                     json_agg(
                         json_build_object('id', u.id, 'name', u.name) 
@@ -490,16 +491,16 @@ app.get('/events', authMiddleware, async (req, res) => {
 });
 
 app.post('/events', authMiddleware, upload.single('image'), async (req, res) => {
-    const { title, description, event_date, location } = req.body;
+    const { title, description, event_date, location, organizer_contact } = req.body;
     const creator_id = req.user.id;
     const image_url = req.file ? req.file.path : null;
 
     const query = `
-            INSERT INTO events (title, description, event_date, location, creator_id, image_url)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO events (title, description, event_date, location, creator_id, image_url, organizer_contact)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         `;
-    const values = [title, description, event_date, location, creator_id, image_url];
+    const values = [title, description, event_date, location, creator_id, image_url, organizer_contact];
     const { rows } = await db.query(query, values);
 
     await addLog(
@@ -507,7 +508,7 @@ app.post('/events', authMiddleware, upload.single('image'), async (req, res) => 
         req.user.name,
         req.user.email,
         ACTION_TYPES.EVENT_CREATE,
-        `title=${title}, description=${description}, event_date=${event_date}, location=${location}, imagePath=${image_url}`,
+        `title=${title}, description=${description}, event_date=${event_date}, location=${location}, imagePath=${image_url}, organizer_contact=${organizer_contact}`,
     );
 
     const event = rows[0];
@@ -527,21 +528,18 @@ app.delete('/events/delete/:id', authMiddleware, async (req, res) => {
 app.put('/events/update/:id', authMiddleware, upload.single('image'), async (req, res) => {
     const eventId = req.params.id;
     const userId = req.user.id;
-    const { title, description, event_date, location } = req.body;
+    const { title, description, event_date, location, organizer_contact } = req.body;
     const image_url = req.file ? req.file.path : null;
 
     if (!image_url) {
-        await db.query(`UPDATE events SET title = $1, description = $2, event_date = $3, location = $4 WHERE id = $5`, [
-            title,
-            description,
-            event_date,
-            location,
-            eventId,
-        ]);
+        await db.query(
+            `UPDATE events SET title = $1, description = $2, event_date = $3, location = $4, organizer_contact = $5 WHERE id = $6`,
+            [title, description, event_date, location, organizer_contact, eventId],
+        );
     } else {
         await db.query(
-            `UPDATE events SET title = $1, description = $2, event_date = $3, location = $4, image_url = $5 WHERE id = $6`,
-            [title, description, event_date, location, image_url, eventId],
+            `UPDATE events SET title = $1, description = $2, event_date = $3, location = $4, image_url = $5, organizer_contact = $6 WHERE id = $7`,
+            [title, description, event_date, location, image_url, organizer_contact, eventId],
         );
     }
 
