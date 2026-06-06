@@ -588,6 +588,6 @@ app.post('/logs', authMiddleware, async (req, res) => {
 });
 
 const port = process.env.PORT || 3857;
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, '127.0.0.1', () => {
     console.log(`Server listening at http://localhost:${port}`);
 });
