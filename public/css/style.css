@@ -1712,7 +1712,7 @@ body {
 
 .toggle-form-btn {
     padding: 0.5rem 1rem;
-    background: var(--gold-primary);
+    background: var(--gold-light);
     color: var(--green-dark);
     border: none;
     border-radius: 8px;
@@ -1723,7 +1723,7 @@ body {
 }
 
 .toggle-form-btn:hover {
-    background: var(--gold-light);
+    background: var(--gold-primary);
 }
 
 .sales-grid {
