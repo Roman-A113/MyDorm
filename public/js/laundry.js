@@ -76,7 +76,7 @@ async function handleCancelBooking(selectedMachineId, selectedDate, bookingId, t
     if (!confirm(`Отменить бронь на ${time}?`)) return;
 
     await cancelLaundry(bookingId);
-    renderNotification('Слот отменен', 'success');
+    renderNotification('Слот отменён', 'success');
 
     allLaundryBookings = await getAllLaundryBookings();
     renderLaundryCalendar(selectedMachineId);

@@ -378,7 +378,7 @@ function initWorkerActions() {
             const newStatus = btn.dataset.status;
 
             await updateRepairStatus(id, newStatus);
-            renderNotification('Статус обновлен', 'success');
+            renderNotification('Статус обновлён', 'success');
 
             await renderShifts();
         });

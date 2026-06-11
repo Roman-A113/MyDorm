@@ -266,7 +266,7 @@ export async function renderSales() {
                 ${
                     otherUserProducts.length > 0
                         ? otherUserProducts.map((p) => renderSaleCard(p)).join('')
-                        : '<div class="empty-message">Другие пользователи еще не опубликовали товары</div>'
+                        : '<div class="empty-message">Другие пользователи ещё не опубликовали товары</div>'
                 }
             </div>
         </div>
