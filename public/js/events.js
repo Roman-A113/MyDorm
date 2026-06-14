@@ -41,6 +41,7 @@ function closeEventModal() {
     document.getElementById('event-update-btn').style.display = 'none';
 
     modal.classList.add('hidden');
+    modal.classList.remove('active');
     form.reset();
 }
 
