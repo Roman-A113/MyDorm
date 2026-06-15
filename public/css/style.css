@@ -957,8 +957,8 @@ body {
 }
 
 .status-completed {
-    background: #dbeafe;
-    color: #1e40af;
+    background: var(--green-pale);
+    color: var(--green-primary);
 }
 
 .btn-sm {
