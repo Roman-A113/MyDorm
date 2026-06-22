@@ -17,3 +17,5 @@
 Просмотр данных заявок по временным слотам с возможностью принятия или отклонения заявки.
 
 [Использованный стек технологий](https://docs.google.com/spreadsheets/d/15RehnNCiNa-kXRwKaCuFCc4VC8pba5ISSMhKarRxiXY/edit?hl=ru&gid=0#gid=0)
+
+[Сайт](https://mydorm.ru/)
